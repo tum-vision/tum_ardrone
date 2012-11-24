@@ -1,0 +1,30 @@
+autoInit 500 800
+
+setMaxControl 1
+setInitialReachDist 0.2
+setStayWithinDist 0.5
+setStayTime 3
+
+# rectangle
+goto 0 0 1 0
+goto 0 0 0 0
+goto -1.5 0 0 0
+goto -1.5 0 1 0
+goto 1.5 0 1 0
+goto 1.5 0 0 0
+goto 0 0 0 0
+
+# house
+goto -1 0 0 0
+goto 1 0 0 0
+goto -1 -2 0 0
+goto 1 -2 0 0
+goto 0 -3 0 0
+goto -1 -2 0 0
+goto -1 0 0 0
+goto 1 -2 0 0
+goto 1 0 0 0
+goto 0 0 0 0
+
+
+land

@@ -1,0 +1,2 @@
+autoInit 500 800
+land

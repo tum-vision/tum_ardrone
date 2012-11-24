@@ -1,0 +1,1 @@
+#define glMultMatrix glMultMatrixd

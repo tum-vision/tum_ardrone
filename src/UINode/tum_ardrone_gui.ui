@@ -1,0 +1,758 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>tum_ardrone_guiClass</class>
+ <widget class="QWidget" name="tum_ardrone_guiClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>629</width>
+    <height>679</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>tum_ardrone GUI</string>
+  </property>
+  <widget class="QGroupBox" name="groupBox">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>341</width>
+     <height>461</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Send Commands</string>
+   </property>
+   <widget class="QPlainTextEdit" name="plainTextEditSendCommand">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>20</y>
+      <width>331</width>
+      <height>341</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+    <property name="lineWrapMode">
+     <enum>QPlainTextEdit::NoWrap</enum>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="buttonClearSend">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>400</y>
+      <width>111</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Clear and Send</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="buttonClear">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>400</y>
+      <width>51</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Clear</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBoxLoadFile">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>370</y>
+      <width>261</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="maxVisibleItems">
+     <number>100</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_6">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>376</y>
+      <width>81</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Load File:</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="buttonReset">
+    <property name="geometry">
+     <rect>
+      <x>270</x>
+      <y>400</y>
+      <width>61</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Reset</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="buttonToggleState">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>430</y>
+      <width>81</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Emergency</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="buttonTakeoff">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>430</y>
+      <width>61</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Takeoff</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="buttonLand">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>430</y>
+      <width>41</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Land</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="buttonSend">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>400</y>
+      <width>51</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Send</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="buttonToggleCam">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>430</y>
+      <width>81</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Toggle Cam</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="buttonFlattrim">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>430</y>
+      <width>71</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>FlatTrim</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_2">
+   <property name="geometry">
+    <rect>
+     <x>350</x>
+     <y>10</y>
+     <width>251</width>
+     <height>141</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Node Communication  Status</string>
+   </property>
+   <widget class="QLabel" name="labelNavdata">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>20</y>
+      <width>191</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Drone Navdata: -</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelControl">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>40</y>
+      <width>191</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Drone Control: -</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelPoseEst">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>60</y>
+      <width>191</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Pose Estimates: -</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelJoy">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>80</y>
+      <width>231</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Joy Input: -</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelDronePings">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>100</y>
+      <width>261</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Pings: -</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_3">
+   <property name="geometry">
+    <rect>
+     <x>350</x>
+     <y>130</y>
+     <width>271</width>
+     <height>131</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Autopilot Status:</string>
+   </property>
+   <widget class="QPlainTextEdit" name="plainTextEditAutopilotStatus">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>20</y>
+      <width>271</width>
+      <height>111</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="verticalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOff</enum>
+    </property>
+    <property name="horizontalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOff</enum>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_4">
+   <property name="geometry">
+    <rect>
+     <x>350</x>
+     <y>260</y>
+     <width>271</width>
+     <height>121</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Stateestimation Status:</string>
+   </property>
+   <widget class="QPlainTextEdit" name="plainTextEditStateestimationStatus">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>20</y>
+      <width>271</width>
+      <height>101</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="verticalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOff</enum>
+    </property>
+    <property name="horizontalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOff</enum>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_5">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>470</y>
+     <width>611</width>
+     <height>201</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Messages</string>
+   </property>
+   <widget class="QPlainTextEdit" name="plainTextEditMessages">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>20</y>
+      <width>611</width>
+      <height>181</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_6">
+   <property name="geometry">
+    <rect>
+     <x>350</x>
+     <y>380</y>
+     <width>271</width>
+     <height>111</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Control Source:</string>
+   </property>
+   <widget class="QRadioButton" name="radioButtonControKB">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>20</y>
+      <width>116</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Keyboard</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="radioButtonControlAuto">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>40</y>
+      <width>116</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Autopilot</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="radioButtonControlJoy">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>20</y>
+      <width>116</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Joystick</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="radioButtonControlNone">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>40</y>
+      <width>116</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>None</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBoxUseOnboardHovering">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>60</y>
+      <width>211</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Use Onboard Hovering</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBoxPingDrone">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>80</y>
+      <width>171</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Ping Drone (every 1s)</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonLand</sender>
+   <signal>clicked()</signal>
+   <receiver>tum_ardrone_guiClass</receiver>
+   <slot>LandClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>210</x>
+     <y>403</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>314</x>
+     <y>218</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonSend</sender>
+   <signal>clicked()</signal>
+   <receiver>tum_ardrone_guiClass</receiver>
+   <slot>SendClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>195</x>
+     <y>403</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>314</x>
+     <y>218</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonClear</sender>
+   <signal>clicked()</signal>
+   <receiver>tum_ardrone_guiClass</receiver>
+   <slot>ClearClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>108</x>
+     <y>403</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>314</x>
+     <y>218</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonTakeoff</sender>
+   <signal>clicked()</signal>
+   <receiver>tum_ardrone_guiClass</receiver>
+   <slot>TakeoffClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>290</x>
+     <y>403</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>314</x>
+     <y>218</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonReset</sender>
+   <signal>clicked()</signal>
+   <receiver>tum_ardrone_guiClass</receiver>
+   <slot>ResetClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>310</x>
+     <y>403</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>314</x>
+     <y>321</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonClearSend</sender>
+   <signal>clicked()</signal>
+   <receiver>tum_ardrone_guiClass</receiver>
+   <slot>ClearSendClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>65</x>
+     <y>403</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>314</x>
+     <y>327</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonToggleState</sender>
+   <signal>clicked()</signal>
+   <receiver>tum_ardrone_guiClass</receiver>
+   <slot>EmergencyClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>200</x>
+     <y>433</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>314</x>
+     <y>327</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonToggleCam</sender>
+   <signal>clicked()</signal>
+   <receiver>tum_ardrone_guiClass</receiver>
+   <slot>ToggleCamClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>295</x>
+     <y>433</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>314</x>
+     <y>327</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>comboBoxLoadFile</sender>
+   <signal>currentIndexChanged(QString)</signal>
+   <receiver>tum_ardrone_guiClass</receiver>
+   <slot>LoadFileChanged(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>210</x>
+     <y>368</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>314</x>
+     <y>327</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButtonControKB</sender>
+   <signal>clicked()</signal>
+   <receiver>tum_ardrone_guiClass</receiver>
+   <slot>ControlSourceChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>417</x>
+     <y>420</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>314</x>
+     <y>327</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButtonControlAuto</sender>
+   <signal>clicked()</signal>
+   <receiver>tum_ardrone_guiClass</receiver>
+   <slot>ControlSourceChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>417</x>
+     <y>440</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>314</x>
+     <y>327</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButtonControlNone</sender>
+   <signal>clicked()</signal>
+   <receiver>tum_ardrone_guiClass</receiver>
+   <slot>ControlSourceChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>547</x>
+     <y>440</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>314</x>
+     <y>327</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButtonControlJoy</sender>
+   <signal>clicked()</signal>
+   <receiver>tum_ardrone_guiClass</receiver>
+   <slot>ControlSourceChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>547</x>
+     <y>420</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>314</x>
+     <y>327</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxUseOnboardHovering</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>tum_ardrone_guiClass</receiver>
+   <slot>ToggledUseHovering(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>455</x>
+     <y>450</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>314</x>
+     <y>327</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxPingDrone</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>tum_ardrone_guiClass</receiver>
+   <slot>ToggledPingDrone(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>435</x>
+     <y>450</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>314</x>
+     <y>327</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonFlattrim</sender>
+   <signal>clicked()</signal>
+   <receiver>tum_ardrone_guiClass</receiver>
+   <slot>FlatTrimClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>305</x>
+     <y>453</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>314</x>
+     <y>339</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>SendClicked()</slot>
+  <slot>ClearClicked()</slot>
+  <slot>LandClicked()</slot>
+  <slot>TakeoffClicked()</slot>
+  <slot>LoadFileChanged(QString)</slot>
+  <slot>ResetClicked()</slot>
+  <slot>ClearSendClicked()</slot>
+  <slot>EmergencyClicked()</slot>
+  <slot>ToggleCamClicked()</slot>
+  <slot>ControlSourceChanged()</slot>
+  <slot>ToggledUseHovering(int)</slot>
+  <slot>ToggledPingDrone(int)</slot>
+  <slot>FlatTrimClicked()</slot>
+ </slots>
+</ui>

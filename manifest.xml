@@ -1,0 +1,22 @@
+<package>
+  <description brief="tum_ardrone">
+
+     Autonomous flight with the AR.Drone using PTAM
+
+  </description>
+  <author>Jakob Engel (jajuengel@gmail.com)</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/tum_ardrone</url>
+  <depend package="ardrone_autonomy"/>
+  <depend package="cv_bridge"/>
+  <depend package="dynamic_reconfigure"/>
+  <depend package="sensor_msgs"/>
+  <depend package="std_srvs"/>
+  <depend package="std_msgs"/>
+  <depend package="geometry_msgs"/>
+  <rosdep name="qt4"/>
+  <export><cpp cflags="-I${prefix}/srv/cpp -I${prefix}/msg/cpp"/></export>
+</package>
+
+

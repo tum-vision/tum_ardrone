@@ -1,0 +1,32 @@
+setReference $POSE$
+setMaxControl 1
+setInitialReachDist 0.2
+setStayWithinDist 0.5
+setStayTime 2
+
+goto 1 0 0 0
+goto 1 -1 0 0
+goto 1 -1 1 0
+goto 0 0 0 0
+
+
+setMaxControl 1
+setInitialReachDist 0.2
+setStayWithinDist 0.5
+setStayTime 5
+
+goto 1 0 0 0
+goto 1 -1 0 0
+goto 1 -1 1 0
+goto 0 0 0 0
+
+
+setMaxControl 1
+setInitialReachDist 0.2
+setStayWithinDist 0.5
+setStayTime 10
+
+goto 1 0 0 0
+goto 1 -1 0 0
+goto 1 -1 1 0
+goto 0 0 0 0
