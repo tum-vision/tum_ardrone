@@ -1,25 +1,29 @@
-/*
- * drone_autopilot:
- * This node controls the drone. requires drone_stateestimation.
- * 
- * For further details see Camera-Based Navigation of a Low-Cost Quadrocopter (J. Engel, J. Sturm, D. Cremers)
- * In Proc. of the International Conference on Intelligent Robot Systems (IROS), 2012.
- * 
- * and
- * 
- * Accurate Figure Flying with a Quadrocopter Using Onboard Visual and Inertial Sensing (J. Engel, J. Sturm, D. Cremers)
- * In Proc. of the Workshop on Visual Control of Mobile Robots (ViCoMoR) at the IEEE/RJS International Conference on Intelligent Robot Systems (IROS), 2012. 
+ /**
+ *  This file is part of tum_ardrone.
  *
+ *  Copyright 2012 Jakob Engel <jajuengel@gmail.com> (Technical University of Munich)
+ *  For more information see <https://vision.in.tum.de/data/software/tum_ardrone>.
  *
- * Author: Jakob Engel <jajuengel@gmail.com>
+ *  tum_ardrone is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
  *
+ *  tum_ardrone is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with tum_ardrone.  If not, see <http://www.gnu.org/licenses/>.
  */
+ 
  
  
  
 #include "ControlNode.h"
 #include "ros/ros.h"
-#include <ros/package.h>
+#include "ros/package.h"
 #include "boost/thread.hpp"
 #include <signal.h>
 
