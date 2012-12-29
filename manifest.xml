@@ -16,6 +16,8 @@
   <depend package="std_msgs"/>
   <depend package="geometry_msgs"/>
   <rosdep name="qt4"/>
+  <rosdep name="libblas-dev"/>
+  <rosdep name="liblapack-dev"/>
   <export><cpp cflags="-I${prefix}/srv/cpp -I${prefix}/msg/cpp"/></export>
 </package>
 
