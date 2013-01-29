@@ -46,12 +46,12 @@ pthread_mutex_t ControlNode::logControl_CS = PTHREAD_MUTEX_INITIALIZER;
 
 ControlNode::ControlNode()
 {
-	control_channel = nh_.resolveName("/cmd_vel");
-	dronepose_channel = nh_.resolveName("/ardrone/predictedPose");
-	command_channel = nh_.resolveName("/tum_ardrone/com");
-	takeoff_channel = nh_.resolveName("/ardrone/takeoff");
-	land_channel = nh_.resolveName("/ardrone/land");
-	toggleState_channel = nh_.resolveName("/ardrone/reset");
+    control_channel = nh_.resolveName("cmd_vel");
+    dronepose_channel = nh_.resolveName("ardrone/predictedPose");
+    command_channel = nh_.resolveName("tum_ardrone/com");
+    takeoff_channel = nh_.resolveName("ardrone/takeoff");
+    land_channel = nh_.resolveName("ardrone/land");
+    toggleState_channel = nh_.resolveName("ardrone/reset");
 
 	packagePath = ros::package::getPath("tum_ardrone");
 

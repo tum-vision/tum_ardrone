@@ -75,27 +75,35 @@ void RosThread::droneposeCb(const tum_ardrone::filter_stateConstPtr statePtr)
 }
 void RosThread::velCb(const geometry_msgs::TwistConstPtr vel)
 {
-	velCount++;
-	velCount100ms++;
+    velCount++;
+    velCount100ms++;
 }
 void RosThread::navdataCb(const ardrone_autonomy::NavdataConstPtr navdataPtr)
 {
-	navdataCount++;
+    navdataCount++;
 }
 
 void RosThread::joyCb(const sensor_msgs::JoyConstPtr joy_msg)
 {
-	joyCount++;
+    joyCount++;
+
+    if (joy_msg->axes.size() < 4) {
+        ROS_WARN_ONCE("Error: Non-compatible Joystick!");
+        return;
+    }
+
+    // Avoid crashes if non-ps3 joystick is being used
+    short unsigned int actiavte_index = (joy_msg->buttons.size() > 11) ? 11 : 1;
 
 	// if not controlling: start controlling if sth. is pressed (!)
-	bool justStartedControlling = false;
+    bool justStartedControlling = false;
 	if(gui->currentControlSource != CONTROL_JOY)
 	{
 		if(		joy_msg->axes[0] > 0.1 ||  joy_msg->axes[0] < -0.1 ||
 				joy_msg->axes[1] > 0.1 ||  joy_msg->axes[1] < -0.1 ||
 				joy_msg->axes[2] > 0.1 ||  joy_msg->axes[2] < -0.1 ||
 				joy_msg->axes[3] > 0.1 ||  joy_msg->axes[3] < -0.1 ||
-				joy_msg->buttons.at(11))
+                joy_msg->buttons.at(actiavte_index))
 		{
 			gui->setControlSource(CONTROL_JOY);
 			justStartedControlling = true;
@@ -114,17 +122,17 @@ void RosThread::joyCb(const sensor_msgs::JoyConstPtr joy_msg)
 		sendControlToDrone(c);
 		lastJoyControlSent = c;
 
-		if(!lastL1Pressed && joy_msg->buttons.at(10))
+        if(!lastL1Pressed && joy_msg->buttons.at(actiavte_index - 1))
 			sendTakeoff();
-		if(lastL1Pressed && !joy_msg->buttons.at(10))
+        if(lastL1Pressed && !joy_msg->buttons.at(actiavte_index - 1))
 			sendLand();
 
-		if(!lastR1Pressed && joy_msg->buttons.at(11))
+        if(!lastR1Pressed && joy_msg->buttons.at(actiavte_index))
 			sendToggleState();
 
 	}
-	lastL1Pressed =joy_msg->buttons.at(10);
-	lastR1Pressed = joy_msg->buttons.at(11);
+    lastL1Pressed =joy_msg->buttons.at(actiavte_index - 1);
+    lastR1Pressed = joy_msg->buttons.at(actiavte_index);
 }
 
 
@@ -147,27 +155,27 @@ void RosThread::run()
 {
 	std::cout << "Starting ROS Thread" << std::endl;
 
-	vel_pub	   = nh_.advertise<geometry_msgs::Twist>(nh_.resolveName("/cmd_vel"),1);
-	vel_sub	   = nh_.subscribe(nh_.resolveName("/cmd_vel"),50, &RosThread::velCb, this);
+    vel_pub	   = nh_.advertise<geometry_msgs::Twist>(nh_.resolveName("cmd_vel"),1);
+    vel_sub	   = nh_.subscribe(nh_.resolveName("cmd_vel"),50, &RosThread::velCb, this);
 
-	tum_ardrone_pub	   = nh_.advertise<std_msgs::String>(nh_.resolveName("/tum_ardrone/com"),50);
-	tum_ardrone_sub	   = nh_.subscribe(nh_.resolveName("/tum_ardrone/com"),50, &RosThread::comCb, this);
+    tum_ardrone_pub	   = nh_.advertise<std_msgs::String>(nh_.resolveName("tum_ardrone/com"),50);
+    tum_ardrone_sub	   = nh_.subscribe(nh_.resolveName("tum_ardrone/com"),50, &RosThread::comCb, this);
 
 
-	dronepose_sub	   = nh_.subscribe(nh_.resolveName("/ardrone/predictedPose"),50, &RosThread::droneposeCb, this);
-	navdata_sub	   = nh_.subscribe(nh_.resolveName("/ardrone/navdata"),50, &RosThread::navdataCb, this);
-	joy_sub	   = nh_.subscribe(nh_.resolveName("/joy"),50, &RosThread::joyCb, this);
+    dronepose_sub	   = nh_.subscribe(nh_.resolveName("ardrone/predictedPose"),50, &RosThread::droneposeCb, this);
+    navdata_sub	   = nh_.subscribe(nh_.resolveName("ardrone/navdata"),50, &RosThread::navdataCb, this);
+    joy_sub	   = nh_.subscribe(nh_.resolveName("joy"),50, &RosThread::joyCb, this);
 
-	takeoff_pub	   = nh_.advertise<std_msgs::Empty>(nh_.resolveName("/ardrone/takeoff"),1);
-	land_pub	   = nh_.advertise<std_msgs::Empty>(nh_.resolveName("/ardrone/land"),1);
-	toggleState_pub	   = nh_.advertise<std_msgs::Empty>(nh_.resolveName("/ardrone/reset"),1);
+    takeoff_pub	   = nh_.advertise<std_msgs::Empty>(nh_.resolveName("ardrone/takeoff"),1);
+    land_pub	   = nh_.advertise<std_msgs::Empty>(nh_.resolveName("ardrone/land"),1);
+    toggleState_pub	   = nh_.advertise<std_msgs::Empty>(nh_.resolveName("ardrone/reset"),1);
 
-	takeoff_sub	   = nh_.subscribe(nh_.resolveName("/ardrone/takeoff"),1, &RosThread::takeoffCb, this);
-	land_sub	   = nh_.subscribe(nh_.resolveName("/ardrone/land"),1, &RosThread::landCb, this);
-	toggleState_sub	   = nh_.subscribe(nh_.resolveName("/ardrone/reset"),1, &RosThread::toggleStateCb, this);
+    takeoff_sub	   = nh_.subscribe(nh_.resolveName("ardrone/takeoff"),1, &RosThread::takeoffCb, this);
+    land_sub	   = nh_.subscribe(nh_.resolveName("ardrone/land"),1, &RosThread::landCb, this);
+    toggleState_sub	   = nh_.subscribe(nh_.resolveName("ardrone/reset"),1, &RosThread::toggleStateCb, this);
 
-	toggleCam_srv        = nh_.serviceClient<std_srvs::Empty>(nh_.resolveName("/ardrone/togglecam"),1);
-	flattrim_srv         = nh_.serviceClient<std_srvs::Empty>(nh_.resolveName("/ardrone/flattrim"),1);
+    toggleCam_srv        = nh_.serviceClient<std_srvs::Empty>(nh_.resolveName("ardrone/togglecam"),1);
+    flattrim_srv         = nh_.serviceClient<std_srvs::Empty>(nh_.resolveName("ardrone/flattrim"),1);
 
 	ros::Time last = ros::Time::now();
 	ros::Time lastHz = ros::Time::now();
