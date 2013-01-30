@@ -32,8 +32,10 @@ private:
 	bool resetMap;
 	int moveTimeMS;
 	int waitTimeMS;
+	int reachHeightMS;
+	float controlCommandMultiplier;
 public:
-	KIAutoInit(bool resetMap = true, int imoveTimeMS=500, int iwaitTimeMS=800, bool takeoff=true);
+	KIAutoInit(bool resetMap = true, int imoveTimeMS=500, int iwaitTimeMS=800, int reachHeightMS=6000, float controlMult = 1.0, bool takeoff=true);
 	~KIAutoInit(void);
 	bool update(const tum_ardrone::filter_stateConstPtr statePtr);
 };
