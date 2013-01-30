@@ -186,7 +186,7 @@ void EstimationNode::navdataCb(const ardrone_autonomy::NavdataConstPtr navdataPt
 		if(logfileIMU != NULL)
 			(*logfileIMU) << getMS(lastNavdataReceived.header.stamp) << " " << lastNavdataReceived.tm << " " <<
 			lastNavdataReceived.vx << " " << lastNavdataReceived.vy << " " << lastNavdataReceived.altd << " " << lastNavdataReceived.rotX/1000.0 << " " << lastNavdataReceived.rotY/1000.0 << " " << lastNavdataReceived.rotZ/1000.0 << " " <<
-			0 << " " <<  0 << " " <<  0 << " " << 0 << " " <<	// control: roll pitch gaz yaw.
+			lastNavdataReceived.pressure << " " <<  0 << " " <<  0 << " " << 0 << " " <<	// control: roll pitch gaz yaw.
 			pingNav << " " << pingVid << "\n";
 		pthread_mutex_unlock(&logIMU_CS);
 	}
@@ -238,10 +238,6 @@ void EstimationNode::comCb(const std_msgs::StringConstPtr str)
 		this->toogleLogging();
 	}
 
-	if(str->data.length() == 9 && str->data.substr(0,9) == "toggleLog")
-	{
-		this->toogleLogging();
-	}
 
 
 

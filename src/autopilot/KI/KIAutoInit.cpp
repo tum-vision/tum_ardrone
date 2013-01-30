@@ -24,7 +24,7 @@
 #include "../../HelperFunctions.h"
 
 
-KIAutoInit::KIAutoInit(bool resetMap, int imoveTimeMS, int iwaitTimeMS)
+KIAutoInit::KIAutoInit(bool resetMap, int imoveTimeMS, int iwaitTimeMS, bool takeoff)
 {
 	stage = NONE;
 	this->resetMap = resetMap;
@@ -32,6 +32,9 @@ KIAutoInit::KIAutoInit(bool resetMap, int imoveTimeMS, int iwaitTimeMS)
 	waitTimeMS = iwaitTimeMS;
 	nextUp = false;
 	stageStarted = false;
+
+	if(!takeoff)
+		stage = WAIT_FOR_FIRST;
 
 	char buf[200];
 	if(resetMap)

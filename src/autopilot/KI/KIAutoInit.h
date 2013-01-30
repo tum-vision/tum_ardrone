@@ -33,7 +33,7 @@ private:
 	int moveTimeMS;
 	int waitTimeMS;
 public:
-	KIAutoInit(bool resetMap = true, int imoveTimeMS=500, int iwaitTimeMS=800);
+	KIAutoInit(bool resetMap = true, int imoveTimeMS=500, int iwaitTimeMS=800, bool takeoff=true);
 	~KIAutoInit(void);
 	bool update(const tum_ardrone::filter_stateConstPtr statePtr);
 };

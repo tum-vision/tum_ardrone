@@ -175,7 +175,14 @@ void ControlNode::popNextCommand(const tum_ardrone::filter_stateConstPtr statePt
 		// autoInit
 		if(sscanf(command.c_str(),"autoInit %f %f",&parameters[0], &parameters[1]) == 2)
 		{
-			currentKI = new KIAutoInit(true,parameters[0],parameters[1]);
+			currentKI = new KIAutoInit(true,parameters[0],parameters[1],true);
+			currentKI->setPointers(this,&controller);
+			commandUnderstood = true;
+		}
+
+		else if(sscanf(command.c_str(),"autoTakeover %f %f",&parameters[0], &parameters[1]) == 2)
+		{
+			currentKI = new KIAutoInit(true,parameters[0],parameters[1],false);
 			currentKI->setPointers(this,&controller);
 			commandUnderstood = true;
 		}
