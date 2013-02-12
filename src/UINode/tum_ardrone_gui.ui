@@ -216,7 +216,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>40</y>
+      <y>38</y>
       <width>191</width>
       <height>17</height>
      </rect>
@@ -229,7 +229,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>60</y>
+      <y>56</y>
       <width>191</width>
       <height>17</height>
      </rect>
@@ -242,7 +242,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>80</y>
+      <y>74</y>
       <width>231</width>
       <height>17</height>
      </rect>
@@ -255,7 +255,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>100</y>
+      <y>92</y>
       <width>261</width>
       <height>17</height>
      </rect>
@@ -264,12 +264,25 @@
      <string>Pings: -</string>
     </property>
    </widget>
+   <widget class="QLabel" name="labelDroneMotors">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>110</y>
+      <width>261</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Motors: -</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QGroupBox" name="groupBox_3">
    <property name="geometry">
     <rect>
      <x>350</x>
-     <y>130</y>
+     <y>140</y>
      <width>271</width>
      <height>131</height>
     </rect>
@@ -312,7 +325,7 @@
    <property name="geometry">
     <rect>
      <x>350</x>
-     <y>260</y>
+     <y>270</y>
      <width>271</width>
      <height>121</height>
     </rect>
@@ -383,7 +396,7 @@
    <property name="geometry">
     <rect>
      <x>350</x>
-     <y>380</y>
+     <y>390</y>
      <width>271</width>
      <height>111</height>
     </rect>
