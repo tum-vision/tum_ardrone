@@ -42,6 +42,7 @@
 pthread_mutex_t PTAMWrapper::navInfoQueueCS = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t PTAMWrapper::shallowMapCS = PTHREAD_MUTEX_INITIALIZER;
 
+pthread_mutex_t PTAMWrapper::logScalePairs_CS = PTHREAD_MUTEX_INITIALIZER;
 
 PTAMWrapper::PTAMWrapper(DroneKalmanFilter* f, EstimationNode* nde)
 {
@@ -72,6 +73,8 @@ PTAMWrapper::PTAMWrapper(DroneKalmanFilter* f, EstimationNode* nde)
 	minKFTimeDist = 0;
 
 	maxKF = 60;
+
+	logfileScalePairs = 0;
 }
 
 void PTAMWrapper::ResetInternal()
@@ -125,6 +128,8 @@ void PTAMWrapper::ResetInternal()
 	lockNextFrame = false;
 	PTAMInitializedClock = 0;
 	lastPTAMMessage = "";
+
+	flushMapKeypoints = false;
 
 	node->publishCommand("u l PTAM has been reset.");
 }
@@ -298,10 +303,10 @@ void PTAMWrapper::HandleFrame()
 	if(mpTracker->lastStepResult == mpTracker->I_SECOND)
 	{
 		PTAMInitializedClock = getMS();
-		filter->setCurrentScales(TooN::makeVector(mpMapMaker->initialScaleFactor*1.5,mpMapMaker->initialScaleFactor*1.5,mpMapMaker->initialScaleFactor*1.5));
+		filter->setCurrentScales(TooN::makeVector(mpMapMaker->initialScaleFactor*1.2,mpMapMaker->initialScaleFactor*1.2,mpMapMaker->initialScaleFactor*1.2));
 		mpMapMaker->currentScaleFactor = filter->getCurrentScales()[0];
 		ROS_INFO("PTAM initialized!");
-		ROS_INFO("initial scale: %f\n",mpMapMaker->initialScaleFactor*1.5);
+		ROS_INFO("initial scale: %f\n",mpMapMaker->initialScaleFactor*1.2);
 		node->publishCommand("u l PTAM initialized (took second KF)");
 		framesIncludedForScaleXYZ = -1;
 		lockNextFrame = true;
@@ -426,12 +431,23 @@ void PTAMWrapper::HandleFrame()
 		{
 			TooN::Vector<3> diffPTAM = filterPosePostPTAMBackTransformed.slice<0,3>() - PTAMPositionForScale;
 			bool zCorrupted, allCorrupted;
-			TooN::Vector<3> diffIMU = evalNavQue(ptamPositionForScaleTakenTimestamp - filter->delayVideo + filter->delayXYZ,mimFrameTime - filter->delayVideo + filter->delayXYZ,&zCorrupted, &allCorrupted);
+			float pressureStart = 0, pressureEnd = 0;
+			TooN::Vector<3> diffIMU = evalNavQue(ptamPositionForScaleTakenTimestamp - filter->delayVideo + filter->delayXYZ,mimFrameTime - filter->delayVideo + filter->delayXYZ,&zCorrupted, &allCorrupted, &pressureStart, &pressureEnd);
+
+			pthread_mutex_lock(&logScalePairs_CS);
+			if(logfileScalePairs != 0)
+				(*logfileScalePairs) <<
+						pressureStart << " " <<
+						pressureEnd << " " <<
+						diffIMU[2] << " " <<
+						diffPTAM[2] << std::endl;
+			pthread_mutex_unlock(&logScalePairs_CS);
+
 
 			if(!allCorrupted)
 			{
 				// filtering: z more weight, but only if not corrupted.
-				double xyFactor = 0.25;
+				double xyFactor = 0.05;
 				double zFactor = zCorrupted ? 0 : 3;
 			
 				diffPTAM.slice<0,2>() *= xyFactor; diffPTAM[2] *= zFactor;
@@ -491,51 +507,9 @@ void PTAMWrapper::HandleFrame()
 	else
 		PTAMStatus = PTAM_LOST;
 
-/*
-	// ------------------------- LED anim --------------------------------
-	int sinceLastAnim = clock() - lastAnimSentClock;
-	if(sinceLastAnim > 19000) lastAnimSent = ANIM_NONE;
-	if(mpTracker->lastStepResult == mpTracker->T_TOOK_KF && (lastAnimSent != ANIM_TOOKKF || sinceLastAnim > 200))	// if kf taken: send respective anim, but only if no kf was sent within 200ms.
-	{
-		lastAnimSent = ANIM_TOOKKF;
-		lastAnimSentClock = clock();
-		l->writePipeUI("FORWARD LED blink_orange 10 1\n");
-	}
-	else if(sinceLastAnim > 500)
-	{
-		bool sent = true;
-		if((PTAMStatus == PTAM_BEST || PTAMStatus == PTAM_GOOD) && lastAnimSent != ANIM_GOOD)
-		{
-			l->writePipeUI("FORWARD LED green 5 20\n");
-			lastAnimSentClock = clock();
-			lastAnimSent = ANIM_GOOD;
-		}
-
-		if(PTAMStatus == PTAM_INITIALIZING && lastAnimSent != ANIM_INIT)
-		{
-			l->writePipeUI("FORWARD LED blink_green 5 20\n");
-			lastAnimSentClock = clock();
-			lastAnimSent = ANIM_INIT;
-		}
-
-		if(PTAMStatus == PTAM_LOST && lastAnimSent != ANIM_LOST)
-		{
-			l->writePipeUI("FORWARD LED red 5 20\n");
-			lastAnimSentClock = clock();
-			lastAnimSent = ANIM_LOST;
-		}
-
-		if(PTAMStatus == PTAM_FALSEPOSITIVE && lastAnimSent != ANIM_FALSEPOS)
-		{
-			l->writePipeUI("FORWARD LED blink_red 5 20\n");
-			lastAnimSentClock = clock();
-			lastAnimSent = ANIM_FALSEPOS;
-		}
-	}
-*/
 	 
 	// ----------------------------- update shallow map --------------------------
-	if(!mapLocked)
+	if(!mapLocked && rand()%5==0)
 	{
 		pthread_mutex_lock(&shallowMapCS);
 		mapPointsTransformed.clear();
@@ -559,7 +533,31 @@ void PTAMWrapper::HandleFrame()
 			pos += PTAMOffsets;
 			mapPointsTransformed.push_back(pos);
 		}
+
+		// flush map keypoints
+		if(flushMapKeypoints)
+		{
+			std::ofstream* fle = new std::ofstream();
+			fle->open("pointcloud.txt");
+
+			for(unsigned int i=0;i<mapPointsTransformed.size();i++)
+			{
+				(*fle) << mapPointsTransformed[i][0] << " "
+					   << mapPointsTransformed[i][1] << " "
+					   << mapPointsTransformed[i][2] << std::endl;
+			}
+
+			fle->flush();
+			fle->close();
+
+			printf("FLUSHED %d KEYPOINTS to file pointcloud.txt\n\n",mapPointsTransformed.size());
+
+			flushMapKeypoints = false;
+		}
+
+
 		pthread_mutex_unlock(&shallowMapCS);
+
 	}
 
 
@@ -682,6 +680,7 @@ void PTAMWrapper::HandleFrame()
 				scales[0] << " " << scales[1] << " " << scales[2] << " " << 
 				offsets[0] << " " << offsets[1] << " " << offsets[2] << " " << offsets[3] << " " << offsets[4] << " " << offsets[5] << " " <<
 				sums[0] << " " << sums[1] << " " << sums[2] << " " << 
+				PTAMResult[0] << " " << PTAMResult[1] << " " << PTAMResult[2] << " " << PTAMResult[3] << " " << PTAMResult[4] << " " << PTAMResult[5] << " " <<
 				videoFramePing << std::endl;
 
 		pthread_mutex_unlock(&(node->logPTAM_CS));
@@ -749,42 +748,74 @@ void PTAMWrapper::renderGrid(TooN::SE3<> camFromWorld)
 
 }
 
-TooN::Vector<3> PTAMWrapper::evalNavQue(unsigned int from, unsigned int to, bool* zCorrupted, bool* allCorrupted)
+TooN::Vector<3> PTAMWrapper::evalNavQue(unsigned int from, unsigned int to, bool* zCorrupted, bool* allCorrupted, float* out_start_pressure, float* out_end_pressure)
 {
 	predIMUOnlyForScale->resetPos();
 
 	int firstAdded = 0, lastAdded = 0;
 	pthread_mutex_lock(&navInfoQueueCS);
-	int totSize = navInfoQueue.size();
 	int skipped=0;
 	int used = 0;
 	int firstZ = 0;
-	while(navInfoQueue.size() > 0)
+
+	float sum_first=0, num_first=0, sum_last=0, num_last=0;
+	int pressureAverageRange = 100;
+
+
+	for(std::deque<ardrone_autonomy::Navdata>::iterator cur = navInfoQueue.begin();
+			cur != navInfoQueue.end();
+			)
 	{
-		if(getMS(navInfoQueue.front().header.stamp) < from)		// packages before: delete
+		int curStampMs = getMS(cur->header.stamp);
+
+		if(curStampMs < (int)from-pressureAverageRange)
+			cur = navInfoQueue.erase(cur);
+		else
 		{
-			navInfoQueue.pop_front();
+			if(curStampMs >= (int)from-pressureAverageRange && curStampMs <= (int)from+pressureAverageRange)
+			{
+				sum_first += cur->pressure;
+				num_first++;
+			}
+
+			if(curStampMs >= (int)to-pressureAverageRange && curStampMs <= (int)to+pressureAverageRange)
+			{
+				sum_last += cur->pressure;
+				num_last++;
+			}
+			cur++;
+		}
+	}
+
+	for(std::deque<ardrone_autonomy::Navdata>::iterator cur = navInfoQueue.begin();
+			cur != navInfoQueue.end();
+			cur++
+			)
+	{
+		int frontStamp = getMS(cur->header.stamp);
+		if(frontStamp < from)		// packages before: delete
+		{
+			//navInfoQueue.pop_front();
 			skipped++;
 		}
-		else if(getMS(navInfoQueue.front().header.stamp) >= from && getMS(navInfoQueue.front().header.stamp) <= to)
+		else if(frontStamp >= from && frontStamp <= to)
 		{
 			if(firstAdded == 0) 
 			{
-				firstAdded = getMS(navInfoQueue.front().header.stamp);
-				firstZ = navInfoQueue.front().altd;
+				firstAdded = frontStamp;
+				firstZ = cur->altd;
 				predIMUOnlyForScale->z = firstZ*0.001;	// avoid height check initially!
 			}
-			lastAdded = getMS(navInfoQueue.front().header.stamp);
+			lastAdded = frontStamp;
 			// add
-			predIMUOnlyForScale->predictOneStep(&(navInfoQueue.front()));
+			predIMUOnlyForScale->predictOneStep(&(*cur));
 			// pop
-			navInfoQueue.pop_front();
+			//navInfoQueue.pop_front();
 			used++;
 		}
-		else 
-		{
+		else
 			break;
-		}
+
 	}
 	//printf("QueEval: before: %i; skipped: %i, used: %i, left: %i\n", totSize, skipped, used, navInfoQueue.size());
 	predIMUOnlyForScale->z -= firstZ*0.001;	// make height to height-diff
@@ -798,6 +829,19 @@ TooN::Vector<3> PTAMWrapper::evalNavQue(unsigned int from, unsigned int to, bool
 	else if(*zCorrupted)
 		printf("scalePackage z corrupted (jump in meters: %.3f)!\n",predIMUOnlyForScale->zCorruptedJump);
 
+	printf("first: %f (%f); last: %f (%f)=> diff: %f (z alt diff: %f)\n",
+			sum_first/num_first,
+			num_first,
+			sum_last/num_last,
+			num_last,
+			sum_last/num_last - sum_first/num_first,
+			predIMUOnlyForScale->z
+	);
+
+
+	*out_end_pressure = sum_last/num_last;
+	*out_start_pressure = sum_first/num_first;
+
 	return TooN::makeVector(predIMUOnlyForScale->x,predIMUOnlyForScale->y,predIMUOnlyForScale->z);
 }
 
@@ -807,7 +851,7 @@ void PTAMWrapper::newNavdata(ardrone_autonomy::Navdata* nav)
 
 	if(getMS(lastNavinfoReceived.header.stamp) > 2000000)
 	{
-		printf("PTAMSystem: ignoring navdata package with timestamp %i\n", lastNavinfoReceived.tm);
+		printf("PTAMSystem: ignoring navdata package with timestamp %f\n", lastNavinfoReceived.tm);
 		return;
 	}
 	if(lastNavinfoReceived.header.seq > 2000000 || lastNavinfoReceived.header.seq < 0)
@@ -887,7 +931,25 @@ void PTAMWrapper::on_key_down(int key)
 	{
 		node->publishCommand("toggleLog");
 	}
-
+	if(key == 115) // s
+	{
+		pthread_mutex_lock(&logScalePairs_CS);
+		if(logfileScalePairs == 0)
+		{
+			logfileScalePairs = new std::ofstream();
+			logfileScalePairs->open ("logScalePairs.txt");
+			printf("\nSTART logging scale pairs\n\n");
+		}
+		else
+		{
+			logfileScalePairs->flush();
+			logfileScalePairs->close();
+			delete logfileScalePairs;
+			logfileScalePairs = NULL;
+			printf("\nEND logging scale pairs\n\n");
+		}
+		pthread_mutex_unlock(&logScalePairs_CS);
+	}
 
 	if(key == 109) // m
 	{
@@ -898,6 +960,12 @@ void PTAMWrapper::on_key_down(int key)
 	{
 
 		node->publishCommand("p toggleLockSync");
+	}
+
+	if(key == 116) // t
+	{
+
+		flushMapKeypoints = true;
 	}
 
 }
@@ -982,6 +1050,8 @@ void PTAMWrapper::on_mouse_down(CVD::ImageRef where, int state, int button)
 
 
 	node->publishCommand("c clearCommands");
+	node->publishCommand("c lockScaleFP");
+
 	if(button == 1)
 		snprintf(bf,100,"c moveByRel %.3f %.3f 0 0",x,y);
 	else

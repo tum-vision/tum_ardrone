@@ -24,14 +24,20 @@
 #include "../../HelperFunctions.h"
 
 
-KIAutoInit::KIAutoInit(bool resetMap, int imoveTimeMS, int iwaitTimeMS)
+KIAutoInit::KIAutoInit(bool resetMap, int imoveTimeMS, int iwaitTimeMS, int reachHeightMS, float controlMult, bool takeoff)
 {
 	stage = NONE;
 	this->resetMap = resetMap;
 	moveTimeMS = imoveTimeMS;
 	waitTimeMS = iwaitTimeMS;
+	this->reachHeightMS = reachHeightMS;
+	this->controlCommandMultiplier = controlMult;
+
 	nextUp = false;
 	stageStarted = false;
+
+	if(!takeoff)
+		stage = WAIT_FOR_FIRST;
 
 	char buf[200];
 	if(resetMap)
@@ -95,7 +101,7 @@ bool KIAutoInit::update(const tum_ardrone::filter_stateConstPtr statePtr)
 			return false;
 
 		case STARTED:	// wait 6s to reach hight.
-			if(getMS() - stageStarted > 6000)
+			if(getMS() - stageStarted > reachHeightMS)
 			{
 				stageStarted = getMS();
 				stage = WAIT_FOR_FIRST;
@@ -117,9 +123,9 @@ bool KIAutoInit::update(const tum_ardrone::filter_stateConstPtr statePtr)
 			if(getMS() - stageStarted < moveTimeMS)
 			{
 				if(nextUp)
-					node->sendControlToDrone(ControlCommand(0,0,0,0.6));
+					node->sendControlToDrone(ControlCommand(0,0,0,0.6*controlCommandMultiplier));
 				else
-					node->sendControlToDrone(ControlCommand(0,0,0,-0.3));
+					node->sendControlToDrone(ControlCommand(0,0,0,-0.3*controlCommandMultiplier));
 			}
 			else if(getMS() - stageStarted < moveTimeMS+waitTimeMS)
 			{

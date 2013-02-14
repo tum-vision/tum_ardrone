@@ -88,6 +88,9 @@ tum_ardrone_gui::tum_ardrone_gui(QWidget *parent)
     QObject::connect( this, SIGNAL( setStateestimationInfoSignal(QString) ),
     		           this, SLOT( setStateestimationInfoSlot(QString) ) );
 
+    QObject::connect( this, SIGNAL( setMotorSpeedsSignal(QString) ),
+    		           this, SLOT( setMotorSpeedsSlot(QString) ) );
+
     QObject::connect( this, SIGNAL( closeWindowSignal() ),
     		           this, SLOT( closeWindowSlot() ) );
 
@@ -265,6 +268,10 @@ void tum_ardrone_gui::setStateestimationInfoSlot(QString s)
 {
 	ui.plainTextEditStateestimationStatus->setPlainText(s);
 }
+void tum_ardrone_gui::setMotorSpeedsSlot(QString s)
+{
+	ui.labelDroneMotors->setText(s);
+}
 void tum_ardrone_gui::closeWindowSlot()
 {
 	closeWindow();
@@ -288,6 +295,10 @@ void tum_ardrone_gui::addLogLine(std::string s)
 void tum_ardrone_gui::setAutopilotInfo(std::string s)
 {
 	emit setAutopilotInfoSignal(QString(s.c_str()));
+}
+void tum_ardrone_gui::setMotorSpeeds(std::string s)
+{
+	emit setMotorSpeedsSignal(QString(s.c_str()));
 }
 void tum_ardrone_gui::setStateestimationInfo(std::string s)
 {

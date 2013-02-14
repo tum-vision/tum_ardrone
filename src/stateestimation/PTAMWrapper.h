@@ -102,6 +102,8 @@ private:
 
 	bool forceKF;
 
+	bool flushMapKeypoints;
+
 	int lastAnimSentClock;
 	enum {ANIM_NONE, ANIM_TOOKKF, ANIM_GOOD, ANIM_INIT, ANIM_LOST, ANIM_FALSEPOS} lastAnimSent;
 
@@ -114,7 +116,7 @@ private:
 	int framesIncludedForScaleXYZ;
 	std::deque<ardrone_autonomy::Navdata> navInfoQueue;
 	bool navQueueOverflown;
-	TooN::Vector<3> evalNavQue(unsigned int from, unsigned int to, bool* zCorrupted, bool* allCorrupted);
+	TooN::Vector<3> evalNavQue(unsigned int from, unsigned int to, bool* zCorrupted, bool* allCorrupted, float* out_start_pressure, float* out_end_pressure);
 	
 
 	// keep Running
@@ -129,6 +131,9 @@ private:
 	void renderGrid(TooN::SE3<> camFromWorld);
 
 	int videoFramePing;
+
+	std::ofstream* logfileScalePairs;
+	static pthread_mutex_t logScalePairs_CS; //pthread_mutex_lock( &cs_mutex );
 
 public:
 

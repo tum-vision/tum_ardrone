@@ -64,6 +64,7 @@ private slots:
     void addLogLineSlot(QString);
     void setAutopilotInfoSlot(QString);
     void setStateestimationInfoSlot(QString);
+    void setMotorSpeedsSlot(QString);
 
     void closeWindowSlot();
 
@@ -76,6 +77,7 @@ signals:
 	void addLogLineSignal(QString);
 	void setAutopilotInfoSignal(QString);
 	void setStateestimationInfoSignal(QString);
+    void setMotorSpeedsSignal(QString);
 
 	void closeWindowSignal();
 
@@ -92,6 +94,7 @@ public:
     void addLogLine(std::string s);
     void setAutopilotInfo(std::string s);
     void setStateestimationInfo(std::string s);
+    void setMotorSpeeds(std::string s);
     void closeWindow();
 
     // calculates KB command, based on currently pressed keys.

@@ -159,6 +159,8 @@ void ControlNode::popNextCommand(const tum_ardrone::filter_stateConstPtr statePt
 		char buf[100];
 		float parameters[10];
 
+		int pi;
+
 		// replace macros
 		if((p = command.find("$POSE$")) != std::string::npos)
 		{
@@ -173,9 +175,16 @@ void ControlNode::popNextCommand(const tum_ardrone::filter_stateConstPtr statePt
 
 		// -------- commands -----------
 		// autoInit
-		if(sscanf(command.c_str(),"autoInit %f %f",&parameters[0], &parameters[1]) == 2)
+		if(sscanf(command.c_str(),"autoInit %f %f %f %f",&parameters[0], &parameters[1], &parameters[2], &parameters[3]) == 4)
 		{
-			currentKI = new KIAutoInit(true,parameters[0],parameters[1]);
+			currentKI = new KIAutoInit(true,parameters[0],parameters[1],parameters[2],parameters[3],true);
+			currentKI->setPointers(this,&controller);
+			commandUnderstood = true;
+		}
+
+		else if(sscanf(command.c_str(),"autoTakeover %f %f %f %f",&parameters[0], &parameters[1], &parameters[2], &parameters[3]) == 4)
+		{
+			currentKI = new KIAutoInit(true,parameters[0],parameters[1],parameters[2],parameters[3],false);
 			currentKI->setPointers(this,&controller);
 			commandUnderstood = true;
 		}

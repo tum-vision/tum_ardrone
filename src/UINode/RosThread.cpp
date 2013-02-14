@@ -80,7 +80,18 @@ void RosThread::velCb(const geometry_msgs::TwistConstPtr vel)
 }
 void RosThread::navdataCb(const ardrone_autonomy::NavdataConstPtr navdataPtr)
 {
-    navdataCount++;
+
+	if(navdataCount%10==0)
+	{
+		char buf[200];
+		snprintf(buf,200,"Motors: %f %f %f %f",
+				(float)navdataPtr->motor1,
+				(float)navdataPtr->motor2,
+				(float)navdataPtr->motor3,
+				(float)navdataPtr->motor4);
+		gui->setMotorSpeeds(std::string(buf));
+	}
+	navdataCount++;
 }
 
 void RosThread::joyCb(const sensor_msgs::JoyConstPtr joy_msg)

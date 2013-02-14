@@ -1,0 +1,21 @@
+autoInit 500 800 4000 0.5
+
+setReference $POSE$
+setInitialReachDist 0.2
+setStayWithinDist 0.3
+setStayTime 3
+lockScaleFP
+
+goto 0 0 0 0
+goto 0 0 1 0
+goto 0 0 0 0
+
+
+goto -0.5 -0.5 0 0
+goto -0.5 0.5 0 0
+goto 0.5 0.5 0 0
+goto 0.5 -0.5 0 0
+goto 0 0 0 0
+
+
+
