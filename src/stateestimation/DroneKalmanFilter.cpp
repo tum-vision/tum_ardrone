@@ -925,7 +925,7 @@ void DroneKalmanFilter::setCurrentScales(TooN::Vector<3> scales)
 
 void DroneKalmanFilter::addPTAMObservation(TooN::Vector<6> trans, int time)
 {
-	if(time > predictedUpToTotal)
+	if(time > predictdUpToTimestamp)
 		predictUpTo(time, true,true);
 
 	observePTAM(trans);
@@ -933,7 +933,7 @@ void DroneKalmanFilter::addPTAMObservation(TooN::Vector<6> trans, int time)
 }
 void DroneKalmanFilter::addFakePTAMObservation(int time)
 {
-	if(time > predictedUpToTotal)
+	if(time > predictdUpToTimestamp)
 		predictUpTo(time, true,true);
 
 	lastPosesValid = false;
