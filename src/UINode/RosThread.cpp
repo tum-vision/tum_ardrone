@@ -84,12 +84,12 @@ void RosThread::navdataCb(const ardrone_autonomy::NavdataConstPtr navdataPtr)
 	if(navdataCount%10==0)
 	{
 		char buf[200];
-		snprintf(buf,200,"Motors: %f %f %f %f",
-				(float)navdataPtr->motor1,
-				(float)navdataPtr->motor2,
-				(float)navdataPtr->motor3,
-				(float)navdataPtr->motor4);
-		gui->setMotorSpeeds(std::string(buf));
+		//snprintf(buf,200,"Motors: %f %f %f %f",
+		//		(float)navdataPtr->motor1,
+		//		(float)navdataPtr->motor2,
+		//		(float)navdataPtr->motor3,
+		//		(float)navdataPtr->motor4);
+		//gui->setMotorSpeeds(std::string(buf));
 	}
 	navdataCount++;
 }
@@ -104,7 +104,7 @@ void RosThread::joyCb(const sensor_msgs::JoyConstPtr joy_msg)
     }
 
     // Avoid crashes if non-ps3 joystick is being used
-    short unsigned int actiavte_index = (joy_msg->buttons.size() > 11) ? 11 : 1;
+    short unsigned int actiavte_index = (joy_msg->buttons.size() > 11) ? 11 : 5;
 
 	// if not controlling: start controlling if sth. is pressed (!)
     bool justStartedControlling = false;
@@ -112,8 +112,8 @@ void RosThread::joyCb(const sensor_msgs::JoyConstPtr joy_msg)
 	{
 		if(		joy_msg->axes[0] > 0.1 ||  joy_msg->axes[0] < -0.1 ||
 				joy_msg->axes[1] > 0.1 ||  joy_msg->axes[1] < -0.1 ||
-				joy_msg->axes[2] > 0.1 ||  joy_msg->axes[2] < -0.1 ||
 				joy_msg->axes[3] > 0.1 ||  joy_msg->axes[3] < -0.1 ||
+				joy_msg->axes[4] > 0.1 ||  joy_msg->axes[4] < -0.1 ||
                 joy_msg->buttons.at(actiavte_index))
 		{
 			gui->setControlSource(CONTROL_JOY);
@@ -125,13 +125,17 @@ void RosThread::joyCb(const sensor_msgs::JoyConstPtr joy_msg)
 	if(justStartedControlling || gui->currentControlSource == CONTROL_JOY)
 	{
 		ControlCommand c;
-		c.yaw = -joy_msg->axes[2];
-		c.gaz = joy_msg->axes[3];
+		c.yaw = -joy_msg->axes[3];
+		c.gaz = joy_msg->axes[4];
 		c.roll = -joy_msg->axes[0];
 		c.pitch = -joy_msg->axes[1];
 
 		sendControlToDrone(c);
 		lastJoyControlSent = c;
+
+        if(joy_msg->buttons[0])
+          sendAnimation(18);
+
 
         if(!lastL1Pressed && joy_msg->buttons.at(actiavte_index - 1))
 			sendTakeoff();
@@ -187,6 +191,8 @@ void RosThread::run()
 
     toggleCam_srv        = nh_.serviceClient<std_srvs::Empty>(nh_.resolveName("ardrone/togglecam"),1);
     flattrim_srv         = nh_.serviceClient<std_srvs::Empty>(nh_.resolveName("ardrone/flattrim"),1);
+    animation_srv         = nh_.serviceClient<ardrone_autonomy::FlightAnim>(nh_.resolveName("/ardrone/setflightanimation"),1);
+
 
 	ros::Time last = ros::Time::now();
 	ros::Time lastHz = ros::Time::now();
@@ -286,4 +292,12 @@ void RosThread::sendFlattrim()
 	pthread_mutex_lock(&send_CS);
 	flattrim_srv.call(flattrim_srv_srvs);
 	pthread_mutex_unlock(&send_CS);
+}
+void RosThread::sendAnimation(int _type, uint32_t _duration)
+{
+    pthread_mutex_lock(&send_CS);
+    animation_srv_srvs.request.duration = _duration;
+    animation_srv_srvs.request.type = _type;
+    animation_srv.call(animation_srv_srvs);
+    pthread_mutex_unlock(&send_CS);
 }

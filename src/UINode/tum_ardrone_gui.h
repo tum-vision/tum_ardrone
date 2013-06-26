@@ -39,6 +39,7 @@ class tum_ardrone_gui : public QWidget
     Q_OBJECT
 
 public slots:
+    void CallAnimationClicked();
 	void LandClicked();
 	void TakeoffClicked();
 	void ToggleCamClicked();
@@ -50,6 +51,7 @@ public slots:
 	void ResetClicked();
 	void FlattrimClicked();
 
+    void AnimationBoxChanged(QString val);
 	void LoadFileChanged(QString val);
 	void ToggledUseHovering(int val);
 	void ToggledPingDrone(int val);
@@ -111,6 +113,7 @@ protected:
     int mapKey(int k);
     bool isPressed[8];	//{j k l i u o q a}
     unsigned int lastRepeat[8];
+    int Animation_mode_;
 
 
 private:

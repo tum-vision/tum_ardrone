@@ -365,9 +365,9 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>470</y>
+     <y>500</y>
      <width>611</width>
-     <height>201</height>
+     <height>171</height>
     </rect>
    </property>
    <property name="title">
@@ -491,6 +491,29 @@
      <bool>true</bool>
     </property>
    </widget>
+  </widget>
+  <widget class="QPushButton" name="buttonCallAnimation">
+   <property name="geometry">
+    <rect>
+     <x>227</x>
+     <y>470</y>
+     <width>111</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Call Animation</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="comboBoxAnimation">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>470</y>
+     <width>211</width>
+     <height>27</height>
+    </rect>
+   </property>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
@@ -740,11 +763,43 @@
    <sender>buttonFlattrim</sender>
    <signal>clicked()</signal>
    <receiver>tum_ardrone_guiClass</receiver>
-   <slot>FlatTrimClicked()</slot>
+   <slot>FlattrimClicked()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>305</x>
      <y>453</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>314</x>
+     <y>339</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonCallAnimation</sender>
+   <signal>clicked()</signal>
+   <receiver>tum_ardrone_guiClass</receiver>
+   <slot>CallAnimationClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>283</x>
+     <y>483</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>314</x>
+     <y>339</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>comboBoxAnimation</sender>
+   <signal>currentIndexChanged(QString)</signal>
+   <receiver>tum_ardrone_guiClass</receiver>
+   <slot>AnimationBoxChanged(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>115</x>
+     <y>483</y>
     </hint>
     <hint type="destinationlabel">
      <x>314</x>
@@ -766,6 +821,6 @@
   <slot>ControlSourceChanged()</slot>
   <slot>ToggledUseHovering(int)</slot>
   <slot>ToggledPingDrone(int)</slot>
-  <slot>FlatTrimClicked()</slot>
+  <slot>FlattrimClicked()</slot>
  </slots>
 </ui>

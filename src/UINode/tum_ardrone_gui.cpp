@@ -34,6 +34,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <typeinfo>
 
 int getdirtxt (std::string dir, std::vector<std::string> &files)
 {
@@ -53,17 +54,18 @@ int getdirtxt (std::string dir, std::vector<std::string> &files)
     return 0;
 }
 
+std::map<std::string,int> RosThread::Animation_map =  RosThread::create_map();
 
 tum_ardrone_gui::tum_ardrone_gui(QWidget *parent)
     : QWidget(parent)
 {
 	ui.setupUi(this);
-	rosThread = NULL;
+    rosThread = NULL;
 	sensGaz = sensYaw = sensRP = 1;
 	currentControlSource = CONTROL_NONE;
 	useHovering = true;
 
-	for(int i=0;i<8;i++)
+    for(int i=0;i<8;i++)
 	{
 		isPressed[i] = false;
 		lastRepeat[i] = 0;
@@ -102,8 +104,14 @@ tum_ardrone_gui::tum_ardrone_gui(QWidget *parent)
     for(unsigned int i=0;i<files.size();i++)
     	ui.comboBoxLoadFile->addItem(QString(files[i].c_str()), QVariant());
 
-}
 
+    ui.comboBoxAnimation->addItem(QString(""), QVariant());
+    std::map<std::string, int>::iterator iter;
+    for (iter = RosThread::Animation_map.begin(); iter != RosThread::Animation_map.end(); ++iter)
+        ui.comboBoxAnimation->addItem(QString(iter->first.c_str()), QVariant());
+
+
+}
 
 
 tum_ardrone_gui::~tum_ardrone_gui()
@@ -111,6 +119,10 @@ tum_ardrone_gui::~tum_ardrone_gui()
 }
 
 // clicked functions
+void tum_ardrone_gui::CallAnimationClicked()
+{
+    rosThread->sendAnimation(Animation_mode_);
+}
 void tum_ardrone_gui::LandClicked()
 {
 	rosThread->sendLand();
@@ -159,6 +171,12 @@ void tum_ardrone_gui::ResetClicked()
 	ClearClicked();
 	rosThread->publishCommand("f reset");
 }
+
+void tum_ardrone_gui::AnimationBoxChanged(QString val)
+{
+    Animation_mode_ = RosThread::Animation_map.find(val.toStdString())->second;
+}
+
 
 
 void tum_ardrone_gui::LoadFileChanged(QString val)
