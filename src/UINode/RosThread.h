@@ -33,6 +33,8 @@
 #include "std_srvs/Empty.h"
 #include "std_msgs/Empty.h"
 #include "ardrone_autonomy/FlightAnim.h"
+#include <std_msgs/Int16.h>
+
 
 enum Animation_Type
 {
@@ -159,7 +161,7 @@ public:
     void leapTakeoffCb(std_msgs::EmptyConstPtr);
     void leapLandCb(std_msgs::EmptyConstPtr);
     void leapMotionCb(geometry_msgs::TwistConstPtr leap_twist);
-    void leapGestureCb(std_msgs::EmptyConstPtr);
+    void leapGestureCb(std_msgs::Int16 msg);
 
 
 	ControlCommand lastJoyControlSent;

@@ -94,7 +94,7 @@ void RosThread::leapMotionCb(geometry_msgs::TwistConstPtr leap_twist)
     }
 }
 
-void RosThread::leapGestureCb(std_msgs::EmptyConstPtr)
+void RosThread::leapGestureCb(std_msgs::Int16 msg)
 {
     if(gui->currentControlSource == CONTROL_LEAP)
     {
