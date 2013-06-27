@@ -225,6 +225,8 @@ void tum_ardrone_gui::ControlSourceChanged()
 		s = CONTROL_JOY;
 	if(ui.radioButtonControlAuto->isChecked())
 		s = CONTROL_AUTO;
+    if(ui.radioButtonControlLeap->isChecked())
+        s = CONTROL_LEAP;
 
 	if(s != CONTROL_AUTO)
 		rosThread->publishCommand("c stop");
@@ -247,6 +249,8 @@ void tum_ardrone_gui::setControlSourceSlot(int cont)
 		ui.radioButtonControlJoy->setChecked(true);
 	if(cont == CONTROL_AUTO)
 		ui.radioButtonControlAuto->setChecked(true);
+    if(cont == CONTROL_LEAP)
+        ui.radioButtonControlLeap->setChecked(true);
 
 	ControlSourceChanged();
 }

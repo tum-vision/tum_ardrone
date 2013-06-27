@@ -90,6 +90,10 @@ private:
 	ros::Subscriber toggleState_sub;
     ros::ServiceClient animation_srv;
     ardrone_autonomy::FlightAnim animation_srv_srvs;
+    ros::Subscriber leapMotion_sub;
+    ros::Subscriber leapTakeoff_sub;
+    ros::Subscriber leapLand_sub;
+    ros::Subscriber leapGesture_sub;
 
 
 
@@ -152,6 +156,12 @@ public:
 	void landCb(std_msgs::EmptyConstPtr);
 	void toggleStateCb(std_msgs::EmptyConstPtr);
 	void takeoffCb(std_msgs::EmptyConstPtr);
+    void leapTakeoffCb(std_msgs::EmptyConstPtr);
+    void leapLandCb(std_msgs::EmptyConstPtr);
+    void leapMotionCb(geometry_msgs::TwistConstPtr leap_twist);
+    void leapGestureCb(std_msgs::EmptyConstPtr);
+
+
 	ControlCommand lastJoyControlSent;
 	bool lastL1Pressed;
 	bool lastR1Pressed;

@@ -32,7 +32,7 @@ class RosThread;
 class PingThread;
 struct ControlCommand;
 
-enum ControlSource {CONTROL_KB = 0, CONTROL_JOY = 1, CONTROL_AUTO = 2, CONTROL_NONE = 3};
+enum ControlSource {CONTROL_KB = 0, CONTROL_JOY = 1, CONTROL_AUTO = 2, CONTROL_NONE = 3, CONTROL_LEAP = 4};
 
 class tum_ardrone_gui : public QWidget
 {

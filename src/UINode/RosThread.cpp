@@ -56,6 +56,53 @@ void RosThread::stopSystem()
 	join();
 }
 
+void RosThread::leapTakeoffCb(std_msgs::EmptyConstPtr)
+{
+    if(gui->currentControlSource == CONTROL_LEAP)
+    {
+        sendTakeoff();
+
+    }
+}
+
+void RosThread::leapLandCb(std_msgs::EmptyConstPtr)
+{
+    if(gui->currentControlSource == CONTROL_LEAP)
+    {
+        sendLand();
+    }
+}
+
+void RosThread::leapMotionCb(geometry_msgs::TwistConstPtr leap_twist)
+{
+    if(gui->currentControlSource == CONTROL_LEAP)
+    {
+        ControlCommand c;
+        c.yaw = -leap_twist->angular.z;
+        c.gaz = leap_twist->linear.z;
+        c.roll = -leap_twist->linear.y;
+        c.pitch = -leap_twist->linear.x;
+
+//        geometry_msgs::Twist cmdT;
+//        cmdT.angular.z = -cmd.yaw;
+//        cmdT.linear.z = cmd.gaz;
+//        cmdT.linear.x = -cmd.pitch;
+//        cmdT.linear.y = -cmd.roll;
+
+
+        sendControlToDrone(c);
+    }
+}
+
+void RosThread::leapGestureCb(std_msgs::EmptyConstPtr)
+{
+    if(gui->currentControlSource == CONTROL_LEAP)
+    {
+        sendAnimation(18);
+    }
+}
+
+
 void RosThread::landCb(std_msgs::EmptyConstPtr)
 {
 	gui->addLogLine("sent: LAND");
@@ -189,6 +236,12 @@ void RosThread::run()
     land_sub	   = nh_.subscribe(nh_.resolveName("ardrone/land"),1, &RosThread::landCb, this);
     toggleState_sub	   = nh_.subscribe(nh_.resolveName("ardrone/reset"),1, &RosThread::toggleStateCb, this);
 
+    leapMotion_sub     = nh_.subscribe(nh_.resolveName("leap/cmd_vel"),1, &RosThread::leapMotionCb, this);
+    leapTakeoff_sub     = nh_.subscribe(nh_.resolveName("leap/takeoff"),1, &RosThread::leapTakeoffCb, this);
+    leapLand_sub        = nh_.subscribe(nh_.resolveName("leap/land"),1, &RosThread::leapLandCb, this);
+    leapGesture_sub        = nh_.subscribe(nh_.resolveName("leap/gesture"),1, &RosThread::leapGestureCb, this);
+
+
     toggleCam_srv        = nh_.serviceClient<std_srvs::Empty>(nh_.resolveName("ardrone/togglecam"),1);
     flattrim_srv         = nh_.serviceClient<std_srvs::Empty>(nh_.resolveName("ardrone/flattrim"),1);
     animation_srv         = nh_.serviceClient<ardrone_autonomy::FlightAnim>(nh_.resolveName("/ardrone/setflightanimation"),1);
@@ -219,6 +272,9 @@ void RosThread::run()
 			case CONTROL_NONE:
 				sendControlToDrone(ControlCommand(0,0,0,0));
 				break;
+            case CONTROL_LEAP:
+                sendControlToDrone(ControlCommand(0,0,0,0));
+                break;
 			}
 		velCount100ms = 0;
 
