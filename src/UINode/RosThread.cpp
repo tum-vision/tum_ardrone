@@ -152,32 +152,63 @@ void RosThread::joyCb(const sensor_msgs::JoyConstPtr joy_msg)
     }
 
     // Avoid crashes if non-ps3 joystick is being used
-    short unsigned int actiavte_index = (joy_msg->buttons.size() > 11) ? 11 : 5;
+    short unsigned int actiavte_index = 0;
+    if (joystick_type_ == 2)
+        actiavte_index = (joy_msg->buttons.size() > 11) ? 11 : 5;
+    else
+        actiavte_index = (joy_msg->buttons.size() > 11) ? 11 : 1;
 
     // if not controlling: start controlling if sth. is pressed (!)
     bool justStartedControlling = false;
     if (gui->currentControlSource != CONTROL_JOY)
     {
-        if 
-        (
-        	joy_msg->axes[0] > 0.1 ||  joy_msg->axes[0] < -0.1 ||
-            joy_msg->axes[1] > 0.1 ||  joy_msg->axes[1] < -0.1 ||
-            joy_msg->axes[3] > 0.1 ||  joy_msg->axes[3] < -0.1 ||
-            joy_msg->axes[4] > 0.1 ||  joy_msg->axes[4] < -0.1 ||
-            joy_msg->buttons.at(actiavte_index)
-        )
-        {
-            gui->setControlSource(CONTROL_JOY);
-            justStartedControlling = true;
-        }
+	if (joystick_type_ == 2)
+	{
+		if 
+		(
+		    joy_msg->axes[0] > 0.1 ||  joy_msg->axes[0] < -0.1 ||
+		    joy_msg->axes[1] > 0.1 ||  joy_msg->axes[1] < -0.1 ||
+		    joy_msg->axes[3] > 0.1 ||  joy_msg->axes[3] < -0.1 ||
+		    joy_msg->axes[4] > 0.1 ||  joy_msg->axes[4] < -0.1 ||
+		    joy_msg->buttons.at(actiavte_index)
+		)
+		{
+		    gui->setControlSource(CONTROL_JOY);
+		    justStartedControlling = true;
+		}
+	}
+	else
+	{
+		if 
+		(
+		    joy_msg->axes[0] > 0.1 ||  joy_msg->axes[0] < -0.1 ||
+		    joy_msg->axes[1] > 0.1 ||  joy_msg->axes[1] < -0.1 ||
+		    joy_msg->axes[3] > 0.1 ||  joy_msg->axes[3] < -0.1 ||
+		    joy_msg->axes[2] > 0.1 ||  joy_msg->axes[2] < -0.1 ||
+		    joy_msg->buttons.at(actiavte_index)
+		)
+		{
+		    gui->setControlSource(CONTROL_JOY);
+		    justStartedControlling = true;
+		}
+	}
+
     }
 
     // are we actually controlling with the Joystick?
     if (justStartedControlling || gui->currentControlSource == CONTROL_JOY)
     {
         ControlCommand c;
-        c.yaw = -joy_msg->axes[3];
-        c.gaz = joy_msg->axes[4];
+    	if (joystick_type_ == 2)
+	{
+	    c.yaw = -joy_msg->axes[3];
+	    c.gaz = joy_msg->axes[4];
+	}
+	else
+	{
+            c.yaw = -joy_msg->axes[2];
+            c.gaz = joy_msg->axes[3];
+	}
         c.roll = -joy_msg->axes[0];
         c.pitch = -joy_msg->axes[1];
 
@@ -249,6 +280,9 @@ void RosThread::run()
     toggleCam_srv        = nh_.serviceClient<std_srvs::Empty>(nh_.resolveName("ardrone/togglecam"), 1);
     flattrim_srv         = nh_.serviceClient<std_srvs::Empty>(nh_.resolveName("ardrone/flattrim"), 1);
     animation_srv         = nh_.serviceClient<ardrone_autonomy::FlightAnim>(nh_.resolveName("/ardrone/setflightanimation"), 1);
+
+    // 1 is PS3. 2 is Logitech
+    nh_.param<int>("joystick_type", joystick_type_, 2.0);
 
 
     ros::Time last = ros::Time::now();

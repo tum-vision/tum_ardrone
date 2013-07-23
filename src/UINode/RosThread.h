@@ -96,6 +96,7 @@ private:
     ros::Subscriber leapTakeoff_sub;
     ros::Subscriber leapLand_sub;
     ros::Subscriber leapGesture_sub;
+    int joystick_type_;
 
 
 
