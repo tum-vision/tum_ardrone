@@ -91,6 +91,7 @@ void PTAMWrapper::ResetInternal()
 
 	// read camera calibration (yes, its done here)
 	std::string file = node->calibFile;
+	node->arDroneVersion=2;
 	while(node->arDroneVersion == 0)
 	{
 		std::cout << "Waiting for first navdata to determine drone version!" << std::endl;
@@ -1084,3 +1085,4 @@ void PTAMWrapper::on_mouse_down(CVD::ImageRef where, int state, int button)
 
 	node->publishCommand(bf);
 }
+

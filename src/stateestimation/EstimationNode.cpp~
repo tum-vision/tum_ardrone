@@ -462,7 +462,7 @@ void EstimationNode::publishTf(TooN::SE3<> trans, ros::Time stamp, int seq, std:
 	tf::Transform tr = tf::Transform(m,v);
 	
 	//tf::StampedTransform t = tf::StampedTransform(tr,stamp,"map",system);  //DPG 19-MARCH-2014
-	tf::StampedTransform t = tf::StampedTransform(tr,ros::Time::now(),"/base_link","/cam_front");  //DPG 19-MARCH-2014
+	tf::StampedTransform t = tf::StampedTransform(tr,ros::Time::now(),"/ardrone_base_link","/cam_front");  //DPG 19-MARCH-2014
 	tf_broadcaster.sendTransform(t);
 
 	// DPG 18-MARCH-2014
