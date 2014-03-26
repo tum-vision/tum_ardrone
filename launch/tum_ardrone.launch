@@ -1,0 +1,8 @@
+<launch>
+  <node name="drone_stateestimation" pkg="tum_ardrone" type="drone_stateestimation">
+  </node>
+  <node name="drone_autopilot" pkg="tum_ardrone" type="drone_autopilot">
+  </node>
+  <node name="drone_gui" pkg="tum_ardrone" type="drone_gui">
+  </node>
+</launch>
