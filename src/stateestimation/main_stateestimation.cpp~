@@ -37,9 +37,10 @@ int main(int argc, char **argv)
   ROS_INFO("Started TUM ArDrone Stateestimation Node.");
 	ros::init(argc, argv,"drone_stateestimation",ros::init_options::AnonymousName);
 	ros::NodeHandle nh("~");
-	nh.getParam("mode", drone_mode);
-	//if (drone_mode.compare("Live") == 0) {node_name="drone_stateestimation"; }
-	//else if (drone_mode.compare("Sim") == 0) { node_name="sim_stateestimation"; }
+
+  /*nh.getParam("mode", drone_mode);
+	if (drone_mode.compare("Live") == 0) {node_name="drone_stateestimation"; }
+	else if (drone_mode.compare("Sim") == 0) { node_name="sim_stateestimation"; }*/
 		
   EstimationNode estimator;
 

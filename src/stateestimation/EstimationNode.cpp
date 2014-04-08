@@ -51,9 +51,13 @@ pthread_mutex_t EstimationNode::logIMU_CS = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t EstimationNode::logPTAM_CS = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t EstimationNode::logFilter_CS = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t EstimationNode::logPTAMRaw_CS = PTHREAD_MUTEX_INITIALIZER;
+extern string drone_mode;
 
 EstimationNode::EstimationNode()
 {
+	ROS_INFO_STREAM("Mode Selected: " << drone_mode);
+	if (drone_mode.compare("Live") == 0) { ROS_INFO_STREAM("Do Live Stuff"); }
+	else if (drone_mode.compare("Sim") == 0) { ROS_INFO_STREAM("Do Sim Stuff"); }
     navdata_channel = nh_.resolveName("ardrone/navdata");
     control_channel = nh_.resolveName("cmd_vel");
     output_channel = nh_.resolveName("ardrone/predictedPose");
@@ -310,7 +314,7 @@ void EstimationNode::Loop()
          // POINT CLOUD 2
 
          int currentKF = ptamWrapper->keyFramesTransformed.size() ;
-	 std::cout << currentKF << " Key Frames Transformed." << std::endl; // DPG 18-MARCH-2014
+	 //std::cout << currentKF << " Key Frames Transformed." << std::endl; // DPG 18-MARCH-2014
          if (currentKF > lastKF) {
             lastKF = currentKF;
 
@@ -343,8 +347,9 @@ void EstimationNode::Loop()
              point_cloud.fields[2].offset = 2*sizeof(uint32_t);
              point_cloud.fields[2].datatype = sensor_msgs::PointField::FLOAT32;
              point_cloud.fields[2].count = 1;
-
-             /*point_cloud.fields[3].name = "rgb";
+		
+		/* DPG 20-MARCH-2014
+             point_cloud.fields[3].name = "rgb";
              point_cloud.fields[3].offset = 3*sizeof(uint32_t);
              point_cloud.fields[3].datatype = sensor_msgs::PointField::INT32;
              point_cloud.fields[3].count = 1;*/
@@ -364,7 +369,8 @@ void EstimationNode::Loop()
              {
                      float pos[] = {mpl[i][0], mpl[i][1], mpl[i][2]};
                      memcpy(dat, pos ,3*sizeof(float));
-
+			
+			//DPG 20-MARCH-2014
                      //uint32_t colorlvl = 0xffffffff;
                      //memcpy(dat+3*sizeof(uint32_t),&colorlvl,sizeof(uint32_t));
 
