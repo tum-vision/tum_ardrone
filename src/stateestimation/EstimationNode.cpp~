@@ -56,14 +56,21 @@ extern string drone_mode;
 EstimationNode::EstimationNode()
 {
 	ROS_INFO_STREAM("Mode Selected: " << drone_mode);
-	if (drone_mode.compare("Live") == 1) { ROS_INFO_STREAM("Do Live Stuff"); }
-	else if (drone_mode.compare("Sim") == 1) { ROS_INFO_STREAM("Do Sim Stuff"); }
-    navdata_channel = nh_.resolveName("ardrone/navdata");
+	if (drone_mode.compare("Live") == 0) 
+	{
+		video_channel = nh_.resolveName("ardrone/image_raw");
+		navdata_channel = nh_.resolveName("ardrone/navdata");
+	}
+	else if (drone_mode.compare("Sim") == 0)
+	{
+		video_channel = nh_.resolveName("vrep/front_cam");
+	}
+    
     control_channel = nh_.resolveName("cmd_vel");
     output_channel = nh_.resolveName("ardrone/predictedPose");
 	std_pose_channel = nh_.resolveName("/ardrone/std_pose"); //DPG 18-MARCH-2014
 	point_cloud_channel = nh_.resolveName("/ardrone/point_cloud"); //DPG 18-MARCH-2014
-    video_channel = nh_.resolveName("ardrone/image_raw");
+    
     command_channel = nh_.resolveName("tum_ardrone/com");
 	
 	packagePath = ros::package::getPath("tum_ardrone");

@@ -56,14 +56,22 @@ extern string drone_mode;
 EstimationNode::EstimationNode()
 {
 	ROS_INFO_STREAM("Mode Selected: " << drone_mode);
-	if (drone_mode.compare("Live") == 0) { ROS_INFO_STREAM("Do Live Stuff"); }
-	else if (drone_mode.compare("Sim") == 0) { ROS_INFO_STREAM("Do Sim Stuff"); }
-    navdata_channel = nh_.resolveName("ardrone/navdata");
+	if (drone_mode.compare("Live") == 0) 
+	{
+		video_channel = nh_.resolveName("ardrone/image_raw");
+		navdata_channel = nh_.resolveName("ardrone/navdata");
+		navdata_sub       = nh_.subscribe(navdata_channel, 10, &EstimationNode::navdataCb, this);
+	}
+	else if (drone_mode.compare("Sim") == 0)
+	{
+		video_channel = nh_.resolveName("vrep/front_cam");
+	}
+    
     control_channel = nh_.resolveName("cmd_vel");
     output_channel = nh_.resolveName("ardrone/predictedPose");
 	std_pose_channel = nh_.resolveName("/ardrone/std_pose"); //DPG 18-MARCH-2014
 	point_cloud_channel = nh_.resolveName("/ardrone/point_cloud"); //DPG 18-MARCH-2014
-    video_channel = nh_.resolveName("ardrone/image_raw");
+    
     command_channel = nh_.resolveName("tum_ardrone/com");
 	
 	packagePath = ros::package::getPath("tum_ardrone");
@@ -90,7 +98,7 @@ EstimationNode::EstimationNode()
 		cout << "set calibFile to DEFAULT" << endl;
 
 
-	navdata_sub       = nh_.subscribe(navdata_channel, 10, &EstimationNode::navdataCb, this);
+	
 	vel_sub          = nh_.subscribe(control_channel,10, &EstimationNode::velCb, this);
 	vid_sub          = nh_.subscribe(video_channel,10, &EstimationNode::vidCb, this);
 	drone_std_pose_pub = nh_.advertise<geometry_msgs::PoseStamped>(std_pose_channel,1); //DPG 18-MARCH-2014
