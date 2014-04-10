@@ -60,6 +60,7 @@ EstimationNode::EstimationNode()
 	{
 		video_channel = nh_.resolveName("ardrone/image_raw");
 		navdata_channel = nh_.resolveName("ardrone/navdata");
+		navdata_sub       = nh_.subscribe(navdata_channel, 10, &EstimationNode::navdataCb, this);
 	}
 	else if (drone_mode.compare("Sim") == 0)
 	{
@@ -97,7 +98,7 @@ EstimationNode::EstimationNode()
 		cout << "set calibFile to DEFAULT" << endl;
 
 
-	navdata_sub       = nh_.subscribe(navdata_channel, 10, &EstimationNode::navdataCb, this);
+	
 	vel_sub          = nh_.subscribe(control_channel,10, &EstimationNode::velCb, this);
 	vid_sub          = nh_.subscribe(video_channel,10, &EstimationNode::vidCb, this);
 	drone_std_pose_pub = nh_.advertise<geometry_msgs::PoseStamped>(std_pose_channel,1); //DPG 18-MARCH-2014
@@ -388,6 +389,7 @@ void EstimationNode::Loop()
              pthread_mutex_unlock(&ptamWrapper->shallowMapCS);
 
              drone_point_cloud_pub.publish(point_cloud);
+		printf("Size of pc: %d\n",point_cloud.width);
          }
 		  // --------- if need be: add fake PTAM obs --------
 		  // if PTAM updates hang (no video or e.g. init), filter is never permanently rolled forward -> queues get too big.
@@ -467,10 +469,11 @@ void EstimationNode::publishTf(TooN::SE3<> trans, ros::Time stamp, int seq, std:
 	m[2][2] = trans.get_rotation().get_matrix()(2,2);
 
 	tf::Vector3 v;
-	v[0] = trans.get_translation()[0];
+	v[2] = trans.get_translation()[0];
 	v[1] = trans.get_translation()[1];
-	v[2] = trans.get_translation()[2];
+	v[0] = trans.get_translation()[2];
 	
+	//Tried: 102,012,
 	
 	tf::Transform tr = tf::Transform(m,v);
 	

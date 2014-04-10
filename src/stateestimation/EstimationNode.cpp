@@ -389,6 +389,7 @@ void EstimationNode::Loop()
              pthread_mutex_unlock(&ptamWrapper->shallowMapCS);
 
              drone_point_cloud_pub.publish(point_cloud);
+		printf("Size of pc: %d\n",point_cloud.width);
          }
 		  // --------- if need be: add fake PTAM obs --------
 		  // if PTAM updates hang (no video or e.g. init), filter is never permanently rolled forward -> queues get too big.
@@ -472,6 +473,7 @@ void EstimationNode::publishTf(TooN::SE3<> trans, ros::Time stamp, int seq, std:
 	v[1] = trans.get_translation()[1];
 	v[2] = trans.get_translation()[2];
 	
+	//Tried: 102,012,
 	
 	tf::Transform tr = tf::Transform(m,v);
 	
