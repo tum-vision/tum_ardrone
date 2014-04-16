@@ -940,6 +940,7 @@ void PTAMWrapper::on_key_down(int key)
 	if(key == 114) // r
 	{
 		node->publishCommand("p reset");
+		printf("p reset\n");
 	}
 	if(key == 117) // u
 	{
@@ -948,6 +949,7 @@ void PTAMWrapper::on_key_down(int key)
 	if(key == 32) // Space
 	{
 		node->publishCommand("p space");
+		printf("p space\n");
 	}
 	if(key == 107) // k
 	{

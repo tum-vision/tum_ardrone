@@ -55,20 +55,24 @@ extern string drone_mode;
 
 EstimationNode::EstimationNode()
 {
-	ROS_INFO_STREAM("Mode Selected: " << drone_mode);
+	
 	if (drone_mode.compare("Live") == 0) 
 	{
 		video_channel = nh_.resolveName("ardrone/image_raw");
 		navdata_channel = nh_.resolveName("ardrone/navdata");
 		navdata_sub       = nh_.subscribe(navdata_channel, 10, &EstimationNode::navdataCb, this);
+		
 	}
 	else if (drone_mode.compare("Sim") == 0)
 	{
 		video_channel = nh_.resolveName("vrep/front_cam");
+		navdata_channel = nh_.resolveName("vrep/navdata");
+		navdata_sub       = nh_.subscribe(navdata_channel, 10, &EstimationNode::navdataCb, this);
 	}
-    
-    control_channel = nh_.resolveName("cmd_vel");
-    output_channel = nh_.resolveName("ardrone/predictedPose");
+	ptam_channel = nh_.resolveName("cmd_register");
+    	ptam_sub = nh_.subscribe(ptam_channel,1,&EstimationNode::ptamCb, this);
+    	control_channel = nh_.resolveName("cmd_vel");
+    	output_channel = nh_.resolveName("ardrone/predictedPose");
 	std_pose_channel = nh_.resolveName("/ardrone/std_pose"); //DPG 18-MARCH-2014
 	point_cloud_channel = nh_.resolveName("/ardrone/point_cloud"); //DPG 18-MARCH-2014
     
@@ -137,6 +141,7 @@ EstimationNode::~EstimationNode()
 
 	//delete infoQueue;
 }
+
 void EstimationNode::navdataCb(const ardrone_autonomy::NavdataConstPtr navdataPtr)
 {
 	//static tf::TransformBroadcaster br;
@@ -175,7 +180,8 @@ void EstimationNode::navdataCb(const ardrone_autonomy::NavdataConstPtr navdataPt
 	lastRosTS = rosTS;
 	lastDroneTS = droneTS;
 
-
+	//DPG 10-APR-2014 
+	if (drone_mode.compare("Sim") == 0) {} //Code to convert from Quaternion to RPY
 	// convert to originally sent drone values (undo ardrone_autonomy changes)
 	lastNavdataReceived.rotZ *= -1;	// yaw inverted
 	lastNavdataReceived.rotY *= -1;	// pitch inverted
@@ -238,7 +244,30 @@ void EstimationNode::vidCb(const sensor_msgs::ImageConstPtr img)
 	// give to PTAM
 	ptamWrapper->newImage(img);
 }
-
+void EstimationNode::ptamCb(const std_msgs::StringConstPtr str)
+{
+	//printf("Received: %d\n",str->data.length());
+	if (str->data.length() > 2 && str->data.substr(0,5) == "reset")
+	{
+		printf("Reset\n");
+		publishCommand("p reset");
+		//PTAMWrapper->publishCommand("p reset");
+	}
+	else if (str->data.length() > 2 && str->data.substr(0,6) == "finish")
+	{
+		printf("Finishing Registration\n");
+		publishCommand("p space");
+	}
+	else if (str->data.length() > 2 && str->data.substr(0,5) == "start")
+	{
+		printf("Starting Registration\n");
+		publishCommand("p space");
+	}
+	else
+	{
+		printf("Unknown\n");
+	}
+}
 void EstimationNode::comCb(const std_msgs::StringConstPtr str)
 {
 	if(str->data.length() > 2 && str->data.substr(0,2) == "p ")

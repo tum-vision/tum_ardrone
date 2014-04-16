@@ -49,6 +49,7 @@ private:
 	ros::Subscriber navdata_sub; // drone navdata
 	ros::Subscriber vel_sub; // to co-read contro commands sent from other thread
 	ros::Subscriber vid_sub;
+	ros::Subscriber ptam_sub;
 	ros::Time lastNavStamp;
 
 
@@ -82,6 +83,7 @@ private:
 	std::string command_channel;
 	std::string std_pose_channel; //DPG 18-MARCH-2014
 	std::string point_cloud_channel;
+	std::string ptam_channel;
 
 
 	// for navdata time-smoothing
@@ -110,6 +112,7 @@ public:
 	void vidCb(const sensor_msgs::ImageConstPtr img);
 	void comCb(const std_msgs::StringConstPtr str);
 	void dynConfCb(tum_ardrone::StateestimationParamsConfig &config, uint32_t level);
+	void ptamCb(const std_msgs::StringConstPtr str);
 
 	// main pose-estimation loop
 	void Loop();
