@@ -1,33 +1,61 @@
 #
 # Author: Jakob Engel <jajuengel@gmail.com>
+# Contributor: Stefan Wilkes <stefan.wilkes@gmail.com>
 #
- 
-cmake_minimum_required(VERSION 2.4.6)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+cmake_minimum_required(VERSION 2.8.3)
+project(tum_ardrone)
 
-# Set the build type.  Options are:
-#  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
-#  Debug          : w/ debug symbols, w/o optimization
-#  Release        : w/o debug symbols, w/ optimization
-#  RelWithDebInfo : w/ debug symbols, w/ optimization
-#  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-set(ROS_BUILD_TYPE RelWithDebInfo)
+## Find catkin macros and libraries
+find_package(catkin REQUIRED COMPONENTS
+  ardrone_autonomy
+  cv_bridge
+  dynamic_reconfigure
+  geometry_msgs
+  sensor_msgs
+  std_msgs
+  std_srvs
+  message_generation
+  roscpp
+  rospy
+)
 
-rosbuild_init()
-
-#set the default path for built executables to the "bin" directory
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-#set the default path for built libraries to the "lib" directory
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
-
+# Compile third party libs
+include(ExternalProject)
+ExternalProject_Add(thirdparty
+	URL ${PROJECT_SOURCE_DIR}/thirdparty/thirdparty.tar.gz
+	PREFIX ${CMAKE_BINARY_DIR}/thirdparty
+	CONFIGURE_COMMAND ""
+	BUILD_COMMAND make
+	INSTALL_COMMAND ""
+	BUILD_IN_SOURCE 1
+)
 
 # ------------------- add dynamic reconfigure api ------------------------------------
-rosbuild_find_ros_package(dynamic_reconfigure)
-include(${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake)
-gencfg()
+generate_dynamic_reconfigure_options(
+  cfg/AutopilotParams.cfg
+  cfg/GUIParams.cfg
+  cfg/StateestimationParams.cfg
+)
 
+################################################
+## Declare ROS messages, services and actions ##
+################################################
 
+## Generate messages in the 'msg' folder
+add_message_files(FILES filter_state.msg)
 
+## Generate added messages 
+generate_messages(DEPENDENCIES std_msgs)
+
+###################################
+## catkin specific configuration ##
+###################################
+catkin_package(CATKIN_DEPENDS message_runtime std_msgs ardrone_autonomy)
+
+###########
+## Build ##
+###########
+include_directories(${catkin_INCLUDE_DIRS})
 
 # --------------------------- stateestimation & PTAM --------------------------------
 # set header ans source files
@@ -89,24 +117,23 @@ set(STATEESTIMATION_HEADER_FILES
 
 # set required libs and headers
 include_directories(
-  ${PROJECT_SOURCE_DIR}/thirdparty/TooN/include 
-  ${PROJECT_SOURCE_DIR}/thirdparty/libcvd/include 
-  ${PROJECT_SOURCE_DIR}/thirdparty/gvars3/include 
+  ${CMAKE_BINARY_DIR}/thirdparty/src/thirdparty/TooN/include 
+  ${CMAKE_BINARY_DIR}/thirdparty/src/thirdparty/libcvd/include 
+  ${CMAKE_BINARY_DIR}/thirdparty/src/thirdparty/gvars3/include 
 )  
 
 link_directories(
-  ${PROJECT_SOURCE_DIR}/thirdparty/libcvd/lib 
-  ${PROJECT_SOURCE_DIR}/thirdparty/gvars3/lib 
+  ${CMAKE_BINARY_DIR}/thirdparty/src/thirdparty/libcvd/lib 
+  ${CMAKE_BINARY_DIR}/thirdparty/src/thirdparty/gvars3/lib 
 )
 set(PTAM_LIBRARIES GL glut cvd GVars3 blas lapack)
 add_definitions(-DKF_REPROJ)
 
 # build!
-rosbuild_add_executable(drone_stateestimation ${STATEESTIMATION_SOURCE_FILES} ${STATEESTIMATION_HEADER_FILES})
-rosbuild_add_compile_flags(drone_stateestimation -D_LINUX -D_REENTRANT -Wall  -O3 -march=nocona -msse3) 
-target_link_libraries(drone_stateestimation ${PTAM_LIBRARIES})
-
-
+add_executable(drone_stateestimation ${STATEESTIMATION_SOURCE_FILES} ${STATEESTIMATION_HEADER_FILES})
+set_target_properties(drone_stateestimation PROPERTIES COMPILE_FLAGS "-D_LINUX -D_REENTRANT -Wall  -O3 -march=nocona -msse3") 
+target_link_libraries(drone_stateestimation ${PTAM_LIBRARIES} ${catkin_LIBRARIES})
+add_dependencies(drone_stateestimation thirdparty ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 
 # ------------------------- autopilot & KI -----------------------------------------
 # set header ans source files
@@ -128,9 +155,9 @@ set(AUTOPILOT_HEADER_FILES
 )
 
 # build!
-rosbuild_add_executable(drone_autopilot ${AUTOPILOT_SOURCE_FILES} ${AUTOPILOT_HEADER_FILES})
-
-
+add_executable(drone_autopilot ${AUTOPILOT_SOURCE_FILES} ${AUTOPILOT_HEADER_FILES})
+target_link_libraries(drone_autopilot ${catkin_LIBRARIES})
+add_dependencies(drone_autopilot thirdparty ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 
 # ---------------------------- GUI --------------------------------------------------
 # set header ans source files
@@ -166,14 +193,8 @@ QT4_WRAP_CPP(GUI_HEADER_FILES_HPP ${GUI_HEADER_FILES})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # build!
-rosbuild_add_executable(drone_gui ${GUI_SOURCE_FILES} ${GUI_RESOURCE_FILES_CPP} ${GUI_UI_FILES_HPP} ${GUI_HEADER_FILES_HPP})
-target_link_libraries(drone_gui ${QT_LIBRARIES} cvd)
+add_executable(drone_gui ${GUI_SOURCE_FILES} ${GUI_RESOURCE_FILES_CPP} ${GUI_UI_FILES_HPP} ${GUI_HEADER_FILES_HPP})
+target_link_libraries(drone_gui ${QT_LIBRARIES} cvd ${catkin_LIBRARIES})
+add_dependencies(drone_gui thirdparty ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 
 
-
-
-# ---------------------------- Messages & Services --------------------------------------------------
-#uncomment if you have defined messages
-rosbuild_genmsg()
-#uncomment if you have defined services
-rosbuild_gensrv()
