@@ -25,28 +25,33 @@ catkin_make
 
 ## Quick start
 
-1. Launch the nodes
+#### Launch the nodes
+
 ``` bash
 roslaunch tum_ardrone ardrone_driver.launch
 roslaunch tum_ardrone tum_ardrone.launch
 ```
 
-2. Check status
+#### Check status
+
 On the GUI, under Drone Communication Status, you should see:
 - Drone Navdata: XHz (X > 100)
 - Pose Estimates: 33Hz
 
-3. Keyboard control:
+#### Keyboard control
+
 - focus drone_gui window
 - press ESC to activate KB control
 - fly around with KB (see [drone_gui](#drone_gui) for key assignments)
 
-4. Joystick control:
+#### Joystick control
+
 - rosrun joy joy_node
 - press PS button on controller to activate it
 - fly around (see [drone_gui](#drone_gui) for key assignments)
 
-3c. Autopilot:
+#### Autopilot
+
 - type command "autoInit 500 800" in top-left text-field
 - click Clear and Send (maybe click Reset first)
   => drone will takeoff & init PTAM, then hold position.
@@ -116,7 +121,7 @@ There are two windows, one shows the video and PTAM's map points, the other one 
 
 ##### Video Window
 
-(http://wiki.ros.org/tum_ardrone/drone_stateestimation?action=AttachFile&do=get&target=video.png "Video window")
+![Video window](http://wiki.ros.org/tum_ardrone/drone_stateestimation?action=AttachFile&do=get&target=video.png)
 
 | Key   | /tum_adrone/com message | Action  |
 |-------|-------------------------|---------|
@@ -134,7 +139,7 @@ Clicking on the video window will generate waypoints, which are sent to drone_au
 
 ##### Map Window
 
-(http://wiki.ros.org/tum_ardrone/drone_stateestimation?action=AttachFile&do=get&target=map.png "Map window")
+![Map window](http://wiki.ros.org/tum_ardrone/drone_stateestimation?action=AttachFile&do=get&target=map.png)
 
 | Key   | /tum_adrone/com message | Action  |
 |-------|-------------------------|---------|
