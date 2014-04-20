@@ -112,7 +112,11 @@ None
 
 #### Required tf transforms
 
+TODO
+
 #### Provided tf transforms
+
+TODO
 
 #### Using it
 
@@ -151,7 +155,123 @@ Clicking on the video window will generate waypoints, which are sent to drone_au
 
 ### drone_autopilot
 
+PID controller for the drone. Also includes basic way-point-following and automatic initialization. Requires [drone_stateestimation](#drone_stateestimation) to be running. The target is set via the /tum_ardrone/com topic.
+
+#### Subscribed topics
+
+- /ardrone/predictedPose
+
+#### Published topics
+
+- /cmd_vel
+- /ardrone/land
+- /ardrone/takeoff
+- /ardrone/reset
+
+#### Services
+
+None
+
+#### Parameters
+
+- ~minPublishFreq: usually, a control command is sent for each pose estimate received from drone_stateestimation. However, if no pose estimate is received for more than minPublishFreq milliseconds, a HOVER command is sent, causing the drone to hover if for example drone_stateestimation is shut down suddenly. Default: 110.
+- Ki_X, Kd_X, Kp_X: PID controller parameters for roll/pitch, gaz (up/down) and yaw.
+- max_X: maximal respective control command sent (ever).
+- rise_fac: rise commands are larger than respective drop commands by this factor. This is due to the drone sometimes dropping unpredictably fast for large drop commands, however rising somethimes requires large rise commands.
+aggressiveness: multiplied to PI-component of all commands sent. Low values lead to the drone flying "slower".
+
+#### Required tf transforms
+
+TODO
+
+#### Provided tf transforms
+
+TODO
+
+#### Using it
+
+The behavior of the autopilot is set by sending commands on /tum_ardrone/com of the form "c COMMAND". A Queue of commands is kept, and as soon as one command is finished (for example a way point reached), the next command is popped. The queue can be cleared by sending "c clearCommands". Commands can be sent using the [drone_gui](#drone_gui) node. Some example scripts can be found in /flightPlans/*.txt. Possible commands are:
+
+- autoInit [int moveTimeMS] [int waitTimeMS] [int riseTimeMs] [float initSpeed]
+
+        takes control, starts drone, initializes PTAM. That is:
+        - starts the drone & and waits riseTimeMs, the drone will rise to approx. 
+          a height of 1m. 
+        - initializes PTAM by taking the first KF, flying up (sending initSpeed as control command) for moveTimeMS, 
+          waiting waitTimeMS and then taking the second KF. 
+          This is done until success (flying up and down respectively).
+        - good default values are "autoInit 500 800 4000 0.5" 
+
+- autoTakeover [int moveTimeMS] [int waitTimeMS] [int riseTimeMs] [float initSpeed]
+
+        takes control, initializes PTAM. The same as autoInit ..., 
+        but to be used when the drone is already flying (skipps the first step).
+
+- takeoff 
+
+        - takes control, starts drone.
+        - does not reset map or initialize PTAM
+
+- setReference [doube x] [double y] [double z] [double yaw]
+
+        sets reference point (used in goto X X X X).
+  
+- setMaxControl [double cap = 1.0]
+
+        maximal control sent is capped at [cap], causing the drone to fly slower.
+        
+- setInitialReachDist [double dist = 0.2]
+
+        drone has to come this close to a way point initially
+
+- setStayWithinDist [double dist = 0.5]
+
+        drone has to stay this close to a way point for a certain amount of time.
+        
+- setStayTime [double seconds = 2.0]
+
+        time the drone has to stay within [stayWithinDist] for target to be reached.
+        
+- clearCommands
+
+        clears all targets, such that the next command is executed immediately.
+
+- goto [doube x] [double y] [double z] [double yaw]
+
+        flies to position (x,y,z yaw), relative to current reference point.
+        blocks until target is reached according to set parameters
+
+- moveBy [doube x] [double y] [double z] [double yaw]
+        
+	moves by (x,y,z,yaw), relative to the current target position
+        blocks until target is reached according to set parameters
+
+- moveByRel [doube x] [double y] [double z] [double yaw]
+        
+	moves by (x,y,z,yaw), relative to the current estimated position 
+        of the drone
+        blocks until target is reached according to set parameters
+        
+- land
+        
+	initializes landing (use auto-land of drone)
+        
+- lockScaleFP
+        
+	sets the one point that does not change when the scale is re-estimated 
+        to the current drone position. The scaleFP can only be set when PTAM is 
+        good, i.e. this is delayed until PTAM is initialized and good.
+        Need to set useWorldFixpoint in dynammic_reconfigure.
+
 ### drone_gui
+
+#### Subscribed topics
+#### Published topics
+#### Services
+#### Parameters
+#### Required tf transforms
+#### Provided tf transforms
+#### Using it
 
 ## Troubleshooting
 
