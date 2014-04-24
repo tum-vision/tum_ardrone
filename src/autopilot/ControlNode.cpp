@@ -38,7 +38,7 @@
 #include "KI/KILand.h"
 #include "KI/KIProcedure.h"
 
-
+using namespace tum_ardrone;
 using namespace std;
 
 pthread_mutex_t ControlNode::logControl_CS = PTHREAD_MUTEX_INITIALIZER;
@@ -81,6 +81,18 @@ ControlNode::ControlNode()
 	land_pub	   = nh_.advertise<std_msgs::Empty>(land_channel,1);
 	toggleState_pub	   = nh_.advertise<std_msgs::Empty>(toggleState_channel,1);
 
+	// services handler
+	setReference_ = nh_.advertiseService("drone_autopilot/setReference", &ControlNode::setReference, this);
+	setMaxControl_ = nh_.advertiseService("drone_autopilot/setMaxControl", &ControlNode::setMaxControl, this);
+	setInitialReachDistance_ = nh_.advertiseService("drone_autopilot/setInitialReachDist", &ControlNode::setInitialReachDist, this);
+	setStayWithinDist_ = nh_.advertiseService("drone_autopilot/setStayWithinDist", &ControlNode::setStayWithinDist, this);
+	setStayTime_ = nh_.advertiseService("drone_autopilot/setStayTime", &ControlNode::setStayTime, this);
+	startControl_ = nh_.advertiseService("drone_autopilot/start", &ControlNode::start, this);
+	stopControl_ = nh_.advertiseService("drone_autopilot/stop", &ControlNode::stop, this);
+	clearCommands_ = nh_.advertiseService("drone_autopilot/clearCommands", &ControlNode::clear, this);
+	hover_ = nh_.advertiseService("drone_autopilot/hover", &ControlNode::hover, this);
+	lockScaleFP_ = nh_.advertiseService("drone_autopilot/lockScaleFP", &ControlNode::lockScaleFP, this);
+
 	// internals
 	parameter_referenceZero = DronePosition(TooN::makeVector(0,0,0),0);
 	parameter_MaxControl = 1;
@@ -121,7 +133,7 @@ void ControlNode::droneposeCb(const tum_ardrone::filter_stateConstPtr statePtr)
 	else if(isControlling)
 	{
 		sendControlToDrone(hoverCommand);
-		ROS_WARN("Autopilot is Controlling, but there is no KI -> sending HOVER");
+		ROS_DEBUG("Autopilot is Controlling, but there is no KI -> sending HOVER");
 	}
 
 
@@ -488,3 +500,72 @@ void ControlNode::clearCommands() {
 	publishCommand("u l Autopilot: Cleared Command Queue");
 	ROS_INFO("Cleared Command Queue!");
 }
+
+bool ControlNode::setReference(SetReference::Request& req, SetReference::Response& res)
+{
+	ROS_INFO("calling service setReference");
+	parameter_referenceZero = DronePosition(TooN::makeVector(req.x, req.y, req.z), req.heading);	
+	res.status = true;
+	return true;
+}
+
+bool ControlNode::setMaxControl(SetMaxControl::Request& req, SetMaxControl::Response& res)
+{
+	ROS_INFO("calling service setMaxControl");
+	parameter_MaxControl = req.speed;
+	res.status = true;
+	return true;
+}
+
+bool ControlNode::setInitialReachDist(SetInitialReachDistance::Request& req, SetInitialReachDistance::Response& res)
+{
+	ROS_INFO("calling service setInitialReachDist");
+	parameter_InitialReachDist = req.distance;
+	res.status = true;
+	return true;
+}
+
+bool ControlNode::setStayWithinDist(SetStayWithinDist::Request& req, SetStayWithinDist::Response& res) {
+	ROS_INFO("calling service setStayWithinDist");
+	parameter_StayWithinDist = req.distance;
+	res.status = true;
+	return true;
+}
+
+bool ControlNode::setStayTime(SetStayTime::Request& req, SetStayTime::Response& res) {
+	ROS_INFO("calling service setStayTime");
+	parameter_StayTime = req.duration;
+	res.status = true;
+	return true;
+}
+
+bool ControlNode::start(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res) {
+	ROS_INFO("calling service start");
+	this->startControl();
+	return true;
+}
+
+bool ControlNode::stop(std_srvs::Empty::Request&, std_srvs::Empty::Response&) {
+	ROS_INFO("calling service stop");
+	this->stopControl();
+	return true;
+}
+
+bool ControlNode::clear(std_srvs::Empty::Request&, std_srvs::Empty::Response&) {
+	ROS_INFO("calling service clearCommands");
+	this->clearCommands();
+	return true;
+}
+
+bool ControlNode::hover(std_srvs::Empty::Request&, std_srvs::Empty::Response&) {
+	ROS_INFO("calling service hover");
+	this->sendControlToDrone(hoverCommand);
+	return true;
+}
+
+bool ControlNode::lockScaleFP(std_srvs::Empty::Request&, std_srvs::Empty::Response&) {
+	ROS_INFO("calling service lockScaleFP");
+	this->publishCommand("p lockScaleFP");
+	return true;
+}
+
