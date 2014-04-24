@@ -77,8 +77,11 @@ private:
 	double parameter_InitialReachDist;
 	double parameter_StayWithinDist;
 
-
-
+	// functions
+	void startControl();
+	void stopControl();
+	void clearCommands();
+	void updateControl(const tum_ardrone::filter_stateConstPtr statePtr);
 
 	void popNextCommand(const tum_ardrone::filter_stateConstPtr statePtr);
 	void reSendInfo();

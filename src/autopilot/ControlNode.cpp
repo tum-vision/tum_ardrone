@@ -116,11 +116,7 @@ void ControlNode::droneposeCb(const tum_ardrone::filter_stateConstPtr statePtr)
 	if(currentKI != NULL)
 	{
 		// let current KI control.
-		if(currentKI->update(statePtr) && commandQueue.size() > 0)
-		{
-			delete currentKI;
-			currentKI = NULL;
-		}
+		this->updateControl(statePtr);
 	}
 	else if(isControlling)
 	{
@@ -311,27 +307,15 @@ void ControlNode::comCb(const std_msgs::StringConstPtr str)
 
 		if(cmd.length() == 4 && cmd.substr(0,4) == "stop")
 		{
-			isControlling = false;
-			publishCommand("u l Autopilot: Stop Controlling");
-			ROS_INFO("STOP CONTROLLING!");
+			stopControl();
 		}
 		else if(cmd.length() == 5 && cmd.substr(0,5) == "start")
 		{
-			isControlling = true;
-			publishCommand("u l Autopilot: Start Controlling");
-			ROS_INFO("START CONTROLLING!");
+			startControl();
 		}
 		else if(cmd.length() == 13 && cmd.substr(0,13) == "clearCommands")
 		{
-			pthread_mutex_lock(&commandQueue_CS);
-			commandQueue.clear();						// clear command queue.
-			controller.clearTarget();					// clear current controller target
-			if(currentKI != NULL) delete currentKI;	// destroy & delete KI.
-			currentKI = NULL;
-			pthread_mutex_unlock(&commandQueue_CS);
-
-			publishCommand("u l Autopilot: Cleared Command Queue");
-			ROS_INFO("Cleared Command Queue!");
+			clearCommands();
 		}
 		else
 		{
@@ -475,3 +459,32 @@ void ControlNode::reSendInfo()
 	publishCommand(buf);
 }
 
+void ControlNode::startControl() {
+	isControlling = true;
+	publishCommand("u l Autopilot: Start Controlling");
+	ROS_INFO("START CONTROLLING!");
+}
+
+void ControlNode::stopControl() {
+	isControlling = false;
+	publishCommand("u l Autopilot: Stop Controlling");
+	ROS_INFO("STOP CONTROLLING!");
+}
+
+void ControlNode::updateControl(const tum_ardrone::filter_stateConstPtr statePtr) {
+	if (currentKI->update(statePtr)) {
+		delete currentKI;
+		currentKI = NULL;
+	}
+}
+
+void ControlNode::clearCommands() {
+	pthread_mutex_lock(&commandQueue_CS);
+	commandQueue.clear();						// clear command queue.
+	controller.clearTarget();					// clear current controller target
+	if(currentKI != NULL) delete currentKI;	// destroy & delete KI.
+	currentKI = NULL;
+	pthread_mutex_unlock(&commandQueue_CS);
+	publishCommand("u l Autopilot: Cleared Command Queue");
+	ROS_INFO("Cleared Command Queue!");
+}
