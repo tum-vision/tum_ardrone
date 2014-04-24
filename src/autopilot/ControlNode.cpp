@@ -33,9 +33,9 @@
 #include <string>
 
 // include KI's
-#include "KI/KIAutoInit.h";
-#include "KI/KIFlyTo.h";
-#include "KI/KILand.h";
+#include "KI/KIAutoInit.h"
+#include "KI/KIFlyTo.h"
+#include "KI/KILand.h"
 #include "KI/KIProcedure.h"
 
 
@@ -155,11 +155,9 @@ void ControlNode::popNextCommand(const tum_ardrone::filter_stateConstPtr statePt
 		ROS_INFO("executing command: %s",command.c_str());
 
 
-		int p;
+		unsigned int p;
 		char buf[100];
 		float parameters[10];
-
-		int pi;
 
 		// replace macros
 		if((p = command.find("$POSE$")) != std::string::npos)
@@ -426,7 +424,7 @@ void ControlNode::sendControlToDrone(ControlCommand cmd)
 	cmdT.linear.y = -cmd.roll;
 
 	// assume that while actively controlling, the above for will never be equal to zero, so i will never hover.
-	cmdT.angular.x = cmdT.angular.x = 0;
+	cmdT.angular.x = cmdT.angular.y = 0;
 
 	if(isControlling)
 	{

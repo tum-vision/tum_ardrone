@@ -53,7 +53,7 @@ public:
 
 	// constructed shortly before first update.
 	inline KIProcedure(void) {node = NULL; controller = NULL; command = "not set"; };
-	inline ~KIProcedure(void) {};
+	virtual ~KIProcedure(void) {};
 };
 
 #endif /* __KIPROCEDURE_H */
