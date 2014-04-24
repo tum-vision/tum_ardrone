@@ -1,0 +1,6 @@
+# Request: initial reach speed
+float32 distance
+---
+# Responce: ok | ko
+bool status
+

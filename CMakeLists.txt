@@ -44,6 +44,17 @@ generate_dynamic_reconfigure_options(
 ## Generate messages in the 'msg' folder
 add_message_files(FILES filter_state.msg)
 
+## Generate services in the 'srv' folder
+add_service_files(
+	DIRECTORY srv
+	FILES
+	SetReference.srv
+	SetMaxControl.srv
+	SetInitialReachDistance.srv
+	SetStayWithinDist.srv
+	SetStayTime.srv
+)
+
 ## Generate added messages 
 generate_messages(DEPENDENCIES std_msgs)
 
