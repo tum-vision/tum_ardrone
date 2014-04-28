@@ -34,7 +34,7 @@
 #include "tum_ardrone/SetReference.h"
 #include "tum_ardrone/SetMaxControl.h"
 #include "tum_ardrone/SetInitialReachDistance.h"
-#include "tum_ardrone/SetStayWithinDist.h"
+#include "tum_ardrone/SetStayWithinDistance.h"
 #include "tum_ardrone/SetStayTime.h"
 #include "std_srvs/Empty.h"
 
@@ -72,7 +72,7 @@ private:
 	ros::ServiceServer setReference_;
 	ros::ServiceServer setMaxControl_;
 	ros::ServiceServer setInitialReachDistance_;
-	ros::ServiceServer setStayWithinDist_;
+	ros::ServiceServer setStayWithinDistance_;
 	ros::ServiceServer setStayTime_;
 	ros::ServiceServer startControl_;
 	ros::ServiceServer stopControl_;
@@ -82,8 +82,8 @@ private:
 
 	bool setReference(tum_ardrone::SetReference::Request&, tum_ardrone::SetReference::Response&);
 	bool setMaxControl(tum_ardrone::SetMaxControl::Request&, tum_ardrone::SetMaxControl::Response&);
-	bool setInitialReachDist(tum_ardrone::SetInitialReachDistance::Request&, tum_ardrone::SetInitialReachDistance::Response&);
-	bool setStayWithinDist(tum_ardrone::SetStayWithinDist::Request&, tum_ardrone::SetStayWithinDist::Response&);
+	bool setInitialReachDistance(tum_ardrone::SetInitialReachDistance::Request&, tum_ardrone::SetInitialReachDistance::Response&);
+	bool setStayWithinDistance(tum_ardrone::SetStayWithinDistance::Request&, tum_ardrone::SetStayWithinDistance::Response&);
 	bool setStayTime(tum_ardrone::SetStayTime::Request&, tum_ardrone::SetStayTime::Response&);
 	bool start(std_srvs::Empty::Request&, std_srvs::Empty::Response&);
 	bool stop(std_srvs::Empty::Request&, std_srvs::Empty::Response&);

@@ -84,8 +84,8 @@ ControlNode::ControlNode()
 	// services handler
 	setReference_ = nh_.advertiseService("drone_autopilot/setReference", &ControlNode::setReference, this);
 	setMaxControl_ = nh_.advertiseService("drone_autopilot/setMaxControl", &ControlNode::setMaxControl, this);
-	setInitialReachDistance_ = nh_.advertiseService("drone_autopilot/setInitialReachDist", &ControlNode::setInitialReachDist, this);
-	setStayWithinDist_ = nh_.advertiseService("drone_autopilot/setStayWithinDist", &ControlNode::setStayWithinDist, this);
+	setInitialReachDistance_ = nh_.advertiseService("drone_autopilot/setInitialReachDistance", &ControlNode::setInitialReachDistance, this);
+	setStayWithinDistance_ = nh_.advertiseService("drone_autopilot/setStayWithinDistance", &ControlNode::setStayWithinDistance, this);
 	setStayTime_ = nh_.advertiseService("drone_autopilot/setStayTime", &ControlNode::setStayTime, this);
 	startControl_ = nh_.advertiseService("drone_autopilot/start", &ControlNode::start, this);
 	stopControl_ = nh_.advertiseService("drone_autopilot/stop", &ControlNode::stop, this);
@@ -517,16 +517,16 @@ bool ControlNode::setMaxControl(SetMaxControl::Request& req, SetMaxControl::Resp
 	return true;
 }
 
-bool ControlNode::setInitialReachDist(SetInitialReachDistance::Request& req, SetInitialReachDistance::Response& res)
+bool ControlNode::setInitialReachDistance(SetInitialReachDistance::Request& req, SetInitialReachDistance::Response& res)
 {
-	ROS_INFO("calling service setInitialReachDist");
+	ROS_INFO("calling service setInitialReachDistance");
 	parameter_InitialReachDist = req.distance;
 	res.status = true;
 	return true;
 }
 
-bool ControlNode::setStayWithinDist(SetStayWithinDist::Request& req, SetStayWithinDist::Response& res) {
-	ROS_INFO("calling service setStayWithinDist");
+bool ControlNode::setStayWithinDistance(SetStayWithinDistance::Request& req, SetStayWithinDistance::Response& res) {
+	ROS_INFO("calling service setStayWithinDistance");
 	parameter_StayWithinDist = req.distance;
 	res.status = true;
 	return true;

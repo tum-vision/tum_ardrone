@@ -51,7 +51,7 @@ add_service_files(
 	SetReference.srv
 	SetMaxControl.srv
 	SetInitialReachDistance.srv
-	SetStayWithinDist.srv
+	SetStayWithinDistance.srv
 	SetStayTime.srv
 )
 
