@@ -162,8 +162,7 @@ void ControlNode::popNextCommand(const tum_ardrone::filter_stateConstPtr statePt
 		// print me
 		ROS_INFO("executing command: %s",command.c_str());
 
-
-		unsigned int p;
+		int p;
 		char buf[100];
 		float parameters[10];
 
@@ -484,7 +483,7 @@ void ControlNode::stopControl() {
 }
 
 void ControlNode::updateControl(const tum_ardrone::filter_stateConstPtr statePtr) {
-	if (currentKI->update(statePtr)) {
+	if (currentKI->update(statePtr) && commandQueue.size() > 0) {
 		delete currentKI;
 		currentKI = NULL;
 	}
