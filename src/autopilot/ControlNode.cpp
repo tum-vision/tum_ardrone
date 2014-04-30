@@ -147,6 +147,8 @@ void ControlNode::droneposeCb(const tum_ardrone::filter_stateConstPtr statePtr)
 	// do controlling
 	pthread_mutex_lock(&commandQueue_CS);
 
+	this->state = statePtr;
+
 	// as long as no KI present:
 	// pop next KI (if next KI present).
 	while(currentKI == NULL && commandQueue.size() > 0)
@@ -172,8 +174,6 @@ void ControlNode::droneposeCb(const tum_ardrone::filter_stateConstPtr statePtr)
 // assumes propery of command queue lock exists (!)
 void ControlNode::popNextCommand(const tum_ardrone::filter_stateConstPtr statePtr)
 {
-	this->state = statePtr;
-
 	// should actually not happen., but to make shure:
 	// delete existing KI.
 	if(currentKI != NULL)
@@ -513,7 +513,7 @@ void ControlNode::stopControl() {
 }
 
 void ControlNode::updateControl(const tum_ardrone::filter_stateConstPtr statePtr) {
-	if (currentKI->update(statePtr) && commandQueue.size() > 0) {
+	if (currentKI->update(statePtr)) {
 		boost::apply_visitor(action_visitor(), currentAction_);
 		delete currentKI;
 		currentKI = NULL;
