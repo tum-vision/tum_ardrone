@@ -33,12 +33,12 @@
 #include <string>
 
 // include KI's
-#include "KI/KIAutoInit.h";
-#include "KI/KIFlyTo.h";
-#include "KI/KILand.h";
+#include "KI/KIAutoInit.h"
+#include "KI/KIFlyTo.h"
+#include "KI/KILand.h"
 #include "KI/KIProcedure.h"
 
-
+using namespace tum_ardrone;
 using namespace std;
 
 pthread_mutex_t ControlNode::logControl_CS = PTHREAD_MUTEX_INITIALIZER;
@@ -81,6 +81,18 @@ ControlNode::ControlNode()
 	land_pub	   = nh_.advertise<std_msgs::Empty>(land_channel,1);
 	toggleState_pub	   = nh_.advertise<std_msgs::Empty>(toggleState_channel,1);
 
+	// services handler
+	setReference_ = nh_.advertiseService("drone_autopilot/setReference", &ControlNode::setReference, this);
+	setMaxControl_ = nh_.advertiseService("drone_autopilot/setMaxControl", &ControlNode::setMaxControl, this);
+	setInitialReachDistance_ = nh_.advertiseService("drone_autopilot/setInitialReachDistance", &ControlNode::setInitialReachDistance, this);
+	setStayWithinDistance_ = nh_.advertiseService("drone_autopilot/setStayWithinDistance", &ControlNode::setStayWithinDistance, this);
+	setStayTime_ = nh_.advertiseService("drone_autopilot/setStayTime", &ControlNode::setStayTime, this);
+	startControl_ = nh_.advertiseService("drone_autopilot/start", &ControlNode::start, this);
+	stopControl_ = nh_.advertiseService("drone_autopilot/stop", &ControlNode::stop, this);
+	clearCommands_ = nh_.advertiseService("drone_autopilot/clearCommands", &ControlNode::clear, this);
+	hover_ = nh_.advertiseService("drone_autopilot/hover", &ControlNode::hover, this);
+	lockScaleFP_ = nh_.advertiseService("drone_autopilot/lockScaleFP", &ControlNode::lockScaleFP, this);
+
 	// internals
 	parameter_referenceZero = DronePosition(TooN::makeVector(0,0,0),0);
 	parameter_MaxControl = 1;
@@ -116,16 +128,12 @@ void ControlNode::droneposeCb(const tum_ardrone::filter_stateConstPtr statePtr)
 	if(currentKI != NULL)
 	{
 		// let current KI control.
-		if(currentKI->update(statePtr) && commandQueue.size() > 0)
-		{
-			delete currentKI;
-			currentKI = NULL;
-		}
+		this->updateControl(statePtr);
 	}
 	else if(isControlling)
 	{
 		sendControlToDrone(hoverCommand);
-		ROS_WARN("Autopilot is Controlling, but there is no KI -> sending HOVER");
+		ROS_DEBUG("Autopilot is Controlling, but there is no KI -> sending HOVER");
 	}
 
 
@@ -154,12 +162,9 @@ void ControlNode::popNextCommand(const tum_ardrone::filter_stateConstPtr statePt
 		// print me
 		ROS_INFO("executing command: %s",command.c_str());
 
-
 		int p;
 		char buf[100];
 		float parameters[10];
-
-		int pi;
 
 		// replace macros
 		if((p = command.find("$POSE$")) != std::string::npos)
@@ -313,27 +318,15 @@ void ControlNode::comCb(const std_msgs::StringConstPtr str)
 
 		if(cmd.length() == 4 && cmd.substr(0,4) == "stop")
 		{
-			isControlling = false;
-			publishCommand("u l Autopilot: Stop Controlling");
-			ROS_INFO("STOP CONTROLLING!");
+			stopControl();
 		}
 		else if(cmd.length() == 5 && cmd.substr(0,5) == "start")
 		{
-			isControlling = true;
-			publishCommand("u l Autopilot: Start Controlling");
-			ROS_INFO("START CONTROLLING!");
+			startControl();
 		}
 		else if(cmd.length() == 13 && cmd.substr(0,13) == "clearCommands")
 		{
-			pthread_mutex_lock(&commandQueue_CS);
-			commandQueue.clear();						// clear command queue.
-			controller.clearTarget();					// clear current controller target
-			if(currentKI != NULL) delete currentKI;	// destroy & delete KI.
-			currentKI = NULL;
-			pthread_mutex_unlock(&commandQueue_CS);
-
-			publishCommand("u l Autopilot: Cleared Command Queue");
-			ROS_INFO("Cleared Command Queue!");
+			clearCommands();
 		}
 		else
 		{
@@ -426,7 +419,7 @@ void ControlNode::sendControlToDrone(ControlCommand cmd)
 	cmdT.linear.y = -cmd.roll;
 
 	// assume that while actively controlling, the above for will never be equal to zero, so i will never hover.
-	cmdT.angular.x = cmdT.angular.x = 0;
+	cmdT.angular.x = cmdT.angular.y = 0;
 
 	if(isControlling)
 	{
@@ -475,5 +468,103 @@ void ControlNode::reSendInfo()
 			lastSentControl.roll, lastSentControl.pitch, lastSentControl.gaz, lastSentControl.yaw);
 
 	publishCommand(buf);
+}
+
+void ControlNode::startControl() {
+	isControlling = true;
+	publishCommand("u l Autopilot: Start Controlling");
+	ROS_INFO("START CONTROLLING!");
+}
+
+void ControlNode::stopControl() {
+	isControlling = false;
+	publishCommand("u l Autopilot: Stop Controlling");
+	ROS_INFO("STOP CONTROLLING!");
+}
+
+void ControlNode::updateControl(const tum_ardrone::filter_stateConstPtr statePtr) {
+	if (currentKI->update(statePtr) && commandQueue.size() > 0) {
+		delete currentKI;
+		currentKI = NULL;
+	}
+}
+
+void ControlNode::clearCommands() {
+	pthread_mutex_lock(&commandQueue_CS);
+	commandQueue.clear();						// clear command queue.
+	controller.clearTarget();					// clear current controller target
+	if(currentKI != NULL) delete currentKI;	// destroy & delete KI.
+	currentKI = NULL;
+	pthread_mutex_unlock(&commandQueue_CS);
+	publishCommand("u l Autopilot: Cleared Command Queue");
+	ROS_INFO("Cleared Command Queue!");
+}
+
+bool ControlNode::setReference(SetReference::Request& req, SetReference::Response& res)
+{
+	ROS_INFO("calling service setReference");
+	parameter_referenceZero = DronePosition(TooN::makeVector(req.x, req.y, req.z), req.heading);	
+	res.status = true;
+	return true;
+}
+
+bool ControlNode::setMaxControl(SetMaxControl::Request& req, SetMaxControl::Response& res)
+{
+	ROS_INFO("calling service setMaxControl");
+	parameter_MaxControl = req.speed;
+	res.status = true;
+	return true;
+}
+
+bool ControlNode::setInitialReachDistance(SetInitialReachDistance::Request& req, SetInitialReachDistance::Response& res)
+{
+	ROS_INFO("calling service setInitialReachDistance");
+	parameter_InitialReachDist = req.distance;
+	res.status = true;
+	return true;
+}
+
+bool ControlNode::setStayWithinDistance(SetStayWithinDistance::Request& req, SetStayWithinDistance::Response& res) {
+	ROS_INFO("calling service setStayWithinDistance");
+	parameter_StayWithinDist = req.distance;
+	res.status = true;
+	return true;
+}
+
+bool ControlNode::setStayTime(SetStayTime::Request& req, SetStayTime::Response& res) {
+	ROS_INFO("calling service setStayTime");
+	parameter_StayTime = req.duration;
+	res.status = true;
+	return true;
+}
+
+bool ControlNode::start(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res) {
+	ROS_INFO("calling service start");
+	this->startControl();
+	return true;
+}
+
+bool ControlNode::stop(std_srvs::Empty::Request&, std_srvs::Empty::Response&) {
+	ROS_INFO("calling service stop");
+	this->stopControl();
+	return true;
+}
+
+bool ControlNode::clear(std_srvs::Empty::Request&, std_srvs::Empty::Response&) {
+	ROS_INFO("calling service clearCommands");
+	this->clearCommands();
+	return true;
+}
+
+bool ControlNode::hover(std_srvs::Empty::Request&, std_srvs::Empty::Response&) {
+	ROS_INFO("calling service hover");
+	this->sendControlToDrone(hoverCommand);
+	return true;
+}
+
+bool ControlNode::lockScaleFP(std_srvs::Empty::Request&, std_srvs::Empty::Response&) {
+	ROS_INFO("calling service lockScaleFP");
+	this->publishCommand("p lockScaleFP");
+	return true;
 }
 

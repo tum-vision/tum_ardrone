@@ -1,0 +1,6 @@
+# Request: max control speed
+float32 speed
+---
+# Responce: ok | ko
+bool status
+

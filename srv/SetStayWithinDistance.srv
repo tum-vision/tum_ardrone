@@ -1,0 +1,6 @@
+# Request: distance to stay to validate reach
+float32 distance
+---
+# Responce: ok | ko
+bool status
+

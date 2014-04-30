@@ -51,7 +51,7 @@ public:
 	double yaw;
 	TooN::Vector<3> pos;
 	inline DronePosition(TooN::Vector<3> pos, double yaw)
-		: pos(pos), yaw(yaw) {}
+		: yaw(yaw), pos(pos) {}
 	inline DronePosition(){ yaw=0; pos=TooN::makeVector(0,0,0);}
 };
 
