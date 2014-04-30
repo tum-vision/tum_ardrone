@@ -18,8 +18,6 @@
  *  along with tum_ardrone.  If not, see <http://www.gnu.org/licenses/>.
  */
  
- 
- 
 #include "ControlNode.h"
 #include "ros/ros.h"
 #include "ros/callback_queue.h"
@@ -93,6 +91,29 @@ ControlNode::ControlNode()
 	hover_ = nh_.advertiseService("drone_autopilot/hover", &ControlNode::hover, this);
 	lockScaleFP_ = nh_.advertiseService("drone_autopilot/lockScaleFP", &ControlNode::lockScaleFP, this);
 
+	// action servers
+	autoInit_ = new InitServer(nh_, "drone_autopilot/autoInit", false);
+	autoInit_->registerGoalCallback(boost::bind(&ControlNode::autoInit, this));
+	autoInit_->start();
+	autoTakeover_ = new InitServer(nh_, "drone_autopilot/autoTakeover", false);
+	autoTakeover_->registerGoalCallback(boost::bind(&ControlNode::autoTakeover, this));
+	autoTakeover_->start();
+	takeoff_ = new EmptyServer(nh_, "drone_autopilot/takeoff", false);
+	takeoff_->registerGoalCallback(boost::bind(&ControlNode::takeoff, this));
+	takeoff_->start();
+	land_ = new EmptyServer(nh_, "drone_autopilot/land", false);
+	land_->registerGoalCallback(boost::bind(&ControlNode::land, this));
+	land_->start();
+	goto_ = new MoveServer(nh_, "drone_autopilot/goto", false);
+	goto_->registerGoalCallback(boost::bind(&ControlNode::goTo, this));
+	goto_->start();
+	moveBy_ = new MoveServer(nh_, "drone_autopilot/moveBy", false);
+	moveBy_->registerGoalCallback(boost::bind(&ControlNode::moveBy, this));
+	moveBy_->start();
+	moveByRel_ = new MoveServer(nh_, "drone_autopilot/moveByRel", false);
+	moveByRel_->registerGoalCallback(boost::bind(&ControlNode::moveByRel, this));
+	moveByRel_->start();
+
 	// internals
 	parameter_referenceZero = DronePosition(TooN::makeVector(0,0,0),0);
 	parameter_MaxControl = 1;
@@ -110,7 +131,14 @@ ControlNode::ControlNode()
 
 ControlNode::~ControlNode()
 {
-
+	// action servers
+	delete autoInit_;
+	delete autoTakeover_;
+	delete takeoff_;
+	delete land_;
+	delete goto_;
+	delete moveBy_;
+	delete moveByRel_;
 }
 
 pthread_mutex_t ControlNode::commandQueue_CS = PTHREAD_MUTEX_INITIALIZER;
@@ -144,6 +172,8 @@ void ControlNode::droneposeCb(const tum_ardrone::filter_stateConstPtr statePtr)
 // assumes propery of command queue lock exists (!)
 void ControlNode::popNextCommand(const tum_ardrone::filter_stateConstPtr statePtr)
 {
+	this->state = statePtr;
+
 	// should actually not happen., but to make shure:
 	// delete existing KI.
 	if(currentKI != NULL)
@@ -484,8 +514,10 @@ void ControlNode::stopControl() {
 
 void ControlNode::updateControl(const tum_ardrone::filter_stateConstPtr statePtr) {
 	if (currentKI->update(statePtr) && commandQueue.size() > 0) {
+		boost::apply_visitor(action_visitor(), currentAction_);
 		delete currentKI;
 		currentKI = NULL;
+		currentAction_ = false;
 	}
 }
 
@@ -566,5 +598,70 @@ bool ControlNode::lockScaleFP(std_srvs::Empty::Request&, std_srvs::Empty::Respon
 	ROS_INFO("calling service lockScaleFP");
 	this->publishCommand("p lockScaleFP");
 	return true;
+}
+
+void ControlNode::autoInit() {
+	currentAction_ = autoInit_;
+	ROS_INFO("calling action autoInit");
+	InitGoalConstPtr g = autoInit_->acceptNewGoal();
+	currentKI = new KIAutoInit(true, g->moveTime, g->waitTime, g->riseTime, g->initSpeed, true);
+	currentKI->setPointers(this, &controller);
+}
+
+void ControlNode::autoTakeover() {
+	currentAction_ = autoTakeover_;
+	ROS_INFO("calling action autoTakeover");
+	InitGoalConstPtr g = autoTakeover_->acceptNewGoal();
+	currentKI = new KIAutoInit(true, g->moveTime, g->waitTime, g->riseTime, g->initSpeed, false);
+	currentKI->setPointers(this, &controller);
+}
+
+void ControlNode::land() {
+	currentAction_ = land_;
+	ROS_INFO("calling action land");
+	land_->acceptNewGoal();
+	currentKI = new KILand();
+	currentKI->setPointers(this, &controller);
+}
+
+void ControlNode::takeoff() {
+	currentAction_ = takeoff_;
+	ROS_INFO("calling action takeoff");
+	takeoff_->acceptNewGoal();
+	currentKI = new KIAutoInit(false);
+	currentKI->setPointers(this, &controller);
+}
+
+void ControlNode::goTo() {
+	currentAction_ = goto_;
+	ROS_INFO("calling action goto");
+	MoveGoalConstPtr g = goto_->acceptNewGoal();
+	currentKI = new KIFlyTo(
+		DronePosition(TooN::makeVector(g->x, g->y, g->z) + parameter_referenceZero.pos,
+			g->heading + parameter_referenceZero.yaw),
+		parameter_StayTime, parameter_MaxControl, parameter_InitialReachDist, parameter_StayWithinDist);
+	currentKI->setPointers(this, &controller);
+}
+
+void ControlNode::moveBy() {
+	currentAction_ = moveBy_;
+	ROS_INFO("calling action moveBy");
+	MoveGoalConstPtr g = moveBy_->acceptNewGoal();
+	currentKI = new KIFlyTo(
+		DronePosition(TooN::makeVector(g->x, g->y, g->z) + controller.getCurrentTarget().pos,
+			g->heading + controller.getCurrentTarget().yaw),
+		parameter_StayTime, parameter_MaxControl, parameter_InitialReachDist, parameter_StayWithinDist);
+	currentKI->setPointers(this, &controller);
+}
+
+void ControlNode::moveByRel() {
+	currentAction_ = moveByRel_;
+	ROS_INFO("calling action moveByRel");
+	MoveGoalConstPtr g = moveByRel_->acceptNewGoal();
+	currentKI = new KIFlyTo(
+		DronePosition(TooN::makeVector(g->x + state->x, g->y + state->y, g->z + state->z),
+			g->heading + state->yaw),
+		parameter_StayTime, parameter_MaxControl, parameter_InitialReachDist, parameter_StayWithinDist);
+	currentKI->setPointers(this, &controller);
 }
 

@@ -17,6 +17,8 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   roscpp
   rospy
+  actionlib_msgs
+  actionlib
 )
 
 # Compile third party libs
@@ -55,13 +57,22 @@ add_service_files(
 	SetStayTime.srv
 )
 
+## Generate actions
+add_action_files(
+	DIRECTORY action
+	FILES
+	Init.action
+	Empty.action
+	Move.action
+)
+
 ## Generate added messages 
-generate_messages(DEPENDENCIES std_msgs)
+generate_messages(DEPENDENCIES std_msgs actionlib_msgs)
 
 ###################################
 ## catkin specific configuration ##
 ###################################
-catkin_package(CATKIN_DEPENDS message_runtime std_msgs ardrone_autonomy)
+catkin_package(CATKIN_DEPENDS message_runtime std_msgs ardrone_autonomy actionlib_msgs actionlib)
 
 ###########
 ## Build ##

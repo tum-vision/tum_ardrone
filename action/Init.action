@@ -1,0 +1,7 @@
+# Parameters
+uint32 moveTime # duration of movement for PTAM init (ms)
+uint32 waitTime # duration of wait before switching KF (ms)
+uint32 riseTime # duration of takeoff (ms)
+float32 initSpeed # speed used in init
+---
+---

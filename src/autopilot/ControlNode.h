@@ -21,6 +21,8 @@
 #ifndef __CONTROLNODE_H
 #define __CONTROLNODE_H
 
+#include <boost/variant.hpp>
+
 #include "ros/ros.h"
 #include "geometry_msgs/Twist.h"
 #include "tum_ardrone/filter_state.h"
@@ -36,7 +38,11 @@
 #include "tum_ardrone/SetInitialReachDistance.h"
 #include "tum_ardrone/SetStayWithinDistance.h"
 #include "tum_ardrone/SetStayTime.h"
-#include "std_srvs/Empty.h"
+
+#include "tum_ardrone/InitAction.h"
+#include "tum_ardrone/EmptyAction.h"
+#include "tum_ardrone/MoveAction.h"
+#include <actionlib/server/simple_action_server.h>
 
 class DroneKalmanFilter;
 class MapView;
@@ -91,6 +97,29 @@ private:
 	bool hover(std_srvs::Empty::Request&, std_srvs::Empty::Response&);
 	bool lockScaleFP(std_srvs::Empty::Request&, std_srvs::Empty::Response&);
 
+	// actions
+	typedef actionlib::SimpleActionServer<tum_ardrone::InitAction> InitServer;
+	InitServer *autoInit_, *autoTakeover_;
+	void autoInit();
+	void autoTakeover();
+	typedef actionlib::SimpleActionServer<tum_ardrone::EmptyAction> EmptyServer;
+	EmptyServer *takeoff_, *land_;
+	void land();
+	void takeoff();
+	typedef actionlib::SimpleActionServer<tum_ardrone::MoveAction> MoveServer;
+	MoveServer *goto_, *moveBy_, *moveByRel_;
+	void goTo();
+	void moveBy();
+	void moveByRel();
+	boost::variant<InitServer*, EmptyServer*, MoveServer*, bool> currentAction_;
+	class action_visitor: public boost::static_visitor<> {
+	public:
+		void operator()(InitServer* s) const { s->setSucceeded(); };
+		void operator()(MoveServer* s) const { s->setSucceeded(); };
+		void operator()(EmptyServer* s) const { s->setSucceeded(); };
+		void operator()(bool b) const {};
+	};
+
 	// command queue & KI stuff
 	std::deque<std::string> commandQueue;
 	static pthread_mutex_t commandQueue_CS;
@@ -116,6 +145,7 @@ private:
 	void reSendInfo();
 	char buf[500];
 	ControlCommand lastSentControl;
+	tum_ardrone::filter_stateConstPtr state;
 public:
 	ControlNode();
 	~ControlNode();
