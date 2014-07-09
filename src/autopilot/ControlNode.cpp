@@ -426,7 +426,7 @@ void ControlNode::sendControlToDrone(ControlCommand cmd)
 	cmdT.linear.y = -cmd.roll;
 
 	// assume that while actively controlling, the above for will never be equal to zero, so i will never hover.
-	cmdT.angular.x = cmdT.angular.x = 0;
+	cmdT.angular.x = cmdT.angular.y = 0;
 
 	if(isControlling)
 	{
