@@ -35,6 +35,7 @@
 #include "std_msgs/String.h"
 #include <dynamic_reconfigure/server.h>
 #include "tum_ardrone/StateestimationParamsConfig.h"
+#include "TooN/se3.h"
 
 
 class DroneKalmanFilter;
@@ -63,6 +64,7 @@ private:
 
 	ros::NodeHandle nh_;
 
+	tf::TransformBroadcaster tf_broadcaster;
 
 	// parameters
 	// every [publishFreq]ms, the node publishes the drones predicted position [predTime]ms into the future.
@@ -76,6 +78,7 @@ private:
 	std::string output_channel;
 	std::string video_channel;
 	std::string command_channel;
+
 
 
 	// for navdata time-smoothing
@@ -113,15 +116,18 @@ public:
 	void publishCommand(std::string c);
 	void reSendInfo();
 
+	void publishTf(TooN::SE3<>, ros::Time stamp, int seq, std::string system);
 
 	// logging stuff
 	// logging stuff
 	std::ofstream* logfileIMU;
 	std::ofstream* logfilePTAM;
 	std::ofstream* logfileFilter;
+	std::ofstream* logfilePTAMRaw;
 	static pthread_mutex_t logIMU_CS;
 	static pthread_mutex_t logPTAM_CS;
 	static pthread_mutex_t logFilter_CS;
+	static pthread_mutex_t logPTAMRaw_CS;
 	long currentLogID;
 	long startedLogClock;
 

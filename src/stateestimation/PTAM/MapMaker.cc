@@ -241,7 +241,8 @@ bool MapMaker::InitFromStereo(KeyFrame &kF,
   if(dTransIMUMagn < 0.05)
     {
       cout << "  IMU Baseline smaller than 5cm, try again: " << dTransIMUMagn << endl;
-      return false;
+      //return false;
+      dTransIMUMagn = 0.1;
     }
 
   //se3.get_translation() *= dTransIMUMagn/dTransMagn;

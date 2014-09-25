@@ -30,6 +30,7 @@
 #include "cvd/image.h"
 #include "cvd/byte.h"
 #include "MouseKeyHandler.h"
+#include "boost/thread.hpp"
 
 class Map;
 class MapMaker;
@@ -74,8 +75,13 @@ private:
 	std::string msg;
 
 	CVD::Image<CVD::byte> mimFrameBW;
+	CVD::Image<CVD::byte> mimFrameBW_workingCopy;
 	int mimFrameTime;
-	int mimFrameSEQ;
+	int mimFrameTime_workingCopy;
+	unsigned int mimFrameSEQ;
+	unsigned int mimFrameSEQ_workingCopy;
+	ros::Time mimFrameTimeRos;
+	ros::Time mimFrameTimeRos_workingCopy;
 	int frameWidth, frameHeight;
 
 
@@ -124,6 +130,9 @@ private:
 	
 	bool lockNextFrame;
 
+	boost::condition_variable  new_frame_signal;
+	boost::mutex new_frame_signal_mutex;
+
 
 	// resets PTAM tracking
 	void ResetInternal();
@@ -152,8 +161,6 @@ public:
 	int maxKF;
 	static pthread_mutex_t navInfoQueueCS; //pthread_mutex_lock( &cs_mutex );
 	static pthread_mutex_t shallowMapCS; //pthread_mutex_lock( &cs_mutex );
-
-
 
 	// Event handling routines.
 	// get called by the myGLWindow on respective event.

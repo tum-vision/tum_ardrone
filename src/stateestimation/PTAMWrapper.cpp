@@ -80,6 +80,7 @@ PTAMWrapper::PTAMWrapper(DroneKalmanFilter* f, EstimationNode* nde)
 void PTAMWrapper::ResetInternal()
 {
 	mimFrameBW.resize(CVD::ImageRef(frameWidth, frameHeight));
+	mimFrameBW_workingCopy.resize(CVD::ImageRef(frameWidth, frameHeight));
 
 
 	if(mpMapMaker != 0) delete mpMapMaker;
@@ -171,6 +172,7 @@ void PTAMWrapper::startSystem()
 void PTAMWrapper::stopSystem()
 {
 	keepRunning = false;
+	new_frame_signal.notify_all();
 	join();
 }
 
@@ -207,22 +209,41 @@ void PTAMWrapper::run()
 	else
 		desiredWindowSize = CVD::ImageRef(frameWidth,frameHeight);
 
+
+	boost::unique_lock<boost::mutex> lock(new_frame_signal_mutex);
+
 	while(keepRunning)
 	{
 		if(newImageAvailable)
 		{
+			newImageAvailable = false;
+
+			// copy to working copy
+			mimFrameBW_workingCopy.copy_from(mimFrameBW);
+			mimFrameTime_workingCopy = mimFrameTime;
+			mimFrameSEQ_workingCopy = mimFrameSEQ;
+			mimFrameTimeRos_workingCopy = mimFrameTimeRos;
+
+			// release lock and do the work-intensive stuff.....
+			lock.unlock();
+
 			HandleFrame();
+
 
 			if(changeSizeNextRender)
 			{
 				myGLWindow->set_size(desiredWindowSize);
 				changeSizeNextRender = false;
 			}
+
+			// get lock again
+			lock.lock();
 		}
 		else
-			usleep(2000);	// TODO: really, really, REALLY dirty hack: busy-wait. replace by some proper signal.
+			new_frame_signal.wait(lock);
 	}
 
+	lock.unlock();
 	delete myGLWindow;
 }
 
@@ -233,7 +254,7 @@ void PTAMWrapper::run()
 // - add a PTAM observation to filter.
 void PTAMWrapper::HandleFrame()
 {
-
+	//printf("tracking Frame at ms=%d (from %d)\n",getMS(ros::Time::now()),mimFrameTime-filter->delayVideo);
 
 
 	// prep data
@@ -249,7 +270,7 @@ void PTAMWrapper::HandleFrame()
 	// --------------------------- ROLL FORWARD TIL FRAME. This is ONLY done here. ---------------------------
 	pthread_mutex_lock( &filter->filter_CS );
 	//filter->predictUpTo(mimFrameTime,true, true);
-	TooN::Vector<10> filterPosePrePTAM = filter->getPoseAtAsVec(mimFrameTime-filter->delayVideo,true);
+	TooN::Vector<10> filterPosePrePTAM = filter->getPoseAtAsVec(mimFrameTime_workingCopy-filter->delayVideo,true);
 	pthread_mutex_unlock( &filter->filter_CS );
 
 	// ------------------------ do PTAM -------------------------
@@ -270,17 +291,18 @@ void PTAMWrapper::HandleFrame()
 	// set
 	mpTracker->setPredictedCamFromW(PTAMPoseGuessSE3);
 	//mpTracker->setLastFrameLost((isGoodCount < -10), (videoFrameID%2 != 0));
-	mpTracker->setLastFrameLost((isGoodCount < -20), (mimFrameSEQ%3 == 0));
+	mpTracker->setLastFrameLost((isGoodCount < -20), (mimFrameSEQ_workingCopy%3 == 0));
 
 	// track
 	ros::Time startedPTAM = ros::Time::now();
-	mpTracker->TrackFrame(mimFrameBW, true);
+	mpTracker->TrackFrame(mimFrameBW_workingCopy, true);
 	TooN::SE3<> PTAMResultSE3 = mpTracker->GetCurrentPose();
 	lastPTAMMessage = msg = mpTracker->GetMessageForUser();
 	ros::Duration timePTAM= ros::Time::now() - startedPTAM;
 
+	TooN::Vector<6> PTAMResultSE3TwistOrg = PTAMResultSE3.ln();
 
-
+	node->publishTf(mpTracker->GetCurrentPose(),mimFrameTimeRos_workingCopy, mimFrameSEQ_workingCopy,"cam_front");
 
 
 	// 1. multiply from left by frontToDroneNT.
@@ -401,10 +423,10 @@ void PTAMWrapper::HandleFrame()
 	pthread_mutex_lock( &filter->filter_CS );
 	if(filter->usePTAM && isGoodCount >= 3)
 	{
-		filter->addPTAMObservation(PTAMResult,mimFrameTime-filter->delayVideo);
+		filter->addPTAMObservation(PTAMResult,mimFrameTime_workingCopy-filter->delayVideo);
 	}
 	else
-		filter->addFakePTAMObservation(mimFrameTime-filter->delayVideo);
+		filter->addFakePTAMObservation(mimFrameTime_workingCopy-filter->delayVideo);
 
 	filterPosePostPTAM = filter->getCurrentPoseSpeedAsVec();
 	pthread_mutex_unlock( &filter->filter_CS );
@@ -413,7 +435,7 @@ void PTAMWrapper::HandleFrame()
 
 
 	// if interval is started: add one step.
-	int includedTime = mimFrameTime - ptamPositionForScaleTakenTimestamp;
+	int includedTime = mimFrameTime_workingCopy - ptamPositionForScaleTakenTimestamp;
 	if(framesIncludedForScaleXYZ >= 0) framesIncludedForScaleXYZ++;
 
 	// if interval is overdue: reset & dont add
@@ -425,14 +447,14 @@ void PTAMWrapper::HandleFrame()
 	if(isGoodCount >= 3)
 	{
 		// filter stuff
-		lastScaleEKFtimestamp = mimFrameTime;
+		lastScaleEKFtimestamp = mimFrameTime_workingCopy;
 
 		if(includedTime >= 2000 && framesIncludedForScaleXYZ > 1)	// ADD! (if too many, was resetted before...)
 		{
 			TooN::Vector<3> diffPTAM = filterPosePostPTAMBackTransformed.slice<0,3>() - PTAMPositionForScale;
 			bool zCorrupted, allCorrupted;
 			float pressureStart = 0, pressureEnd = 0;
-			TooN::Vector<3> diffIMU = evalNavQue(ptamPositionForScaleTakenTimestamp - filter->delayVideo + filter->delayXYZ,mimFrameTime - filter->delayVideo + filter->delayXYZ,&zCorrupted, &allCorrupted, &pressureStart, &pressureEnd);
+			TooN::Vector<3> diffIMU = evalNavQue(ptamPositionForScaleTakenTimestamp - filter->delayVideo + filter->delayXYZ,mimFrameTime_workingCopy - filter->delayVideo + filter->delayXYZ,&zCorrupted, &allCorrupted, &pressureStart, &pressureEnd);
 
 			pthread_mutex_lock(&logScalePairs_CS);
 			if(logfileScalePairs != 0)
@@ -464,7 +486,7 @@ void PTAMWrapper::HandleFrame()
 			framesIncludedForScaleXYZ = 0;
 			PTAMPositionForScale = filterPosePostPTAMBackTransformed.slice<0,3>();
 			//predIMUOnlyForScale->resetPos();	// also resetting z corrupted flag etc. (NOT REquired as reset is done in eval)
-			ptamPositionForScaleTakenTimestamp = mimFrameTime;
+			ptamPositionForScaleTakenTimestamp = mimFrameTime_workingCopy;
 		}
 	}
 	
@@ -654,10 +676,6 @@ void PTAMWrapper::HandleFrame()
 		myGLWindow->DrawCaption(msg);
 	}
 
-
-
-
-
 	lastPTAMResultRaw = PTAMResultSE3; 
 	// ------------------------ LOG --------------------------------------
 	// log!
@@ -674,14 +692,15 @@ void PTAMWrapper::HandleFrame()
 		// - predictedPoseSpeedATLASTNFO estimated for lastNfoTimestamp	(using imu only)
 		if(node->logfilePTAM != NULL)
 			(*(node->logfilePTAM)) << (isGood ? (isVeryGood ? 2 : 1) : 0) << " " <<
-				(mimFrameTime-filter->delayVideo) << " " << filterPosePrePTAM[0] << " " << filterPosePrePTAM[1] << " " << filterPosePrePTAM[2] << " " << filterPosePrePTAM[3] << " " << filterPosePrePTAM[4] << " " << filterPosePrePTAM[5] << " " << filterPosePrePTAM[6] << " " << filterPosePrePTAM[7] << " " << filterPosePrePTAM[8] << " " << filterPosePrePTAM[9] << " " <<
+				(mimFrameTime_workingCopy-filter->delayVideo) << " " << filterPosePrePTAM[0] << " " << filterPosePrePTAM[1] << " " << filterPosePrePTAM[2] << " " << filterPosePrePTAM[3] << " " << filterPosePrePTAM[4] << " " << filterPosePrePTAM[5] << " " << filterPosePrePTAM[6] << " " << filterPosePrePTAM[7] << " " << filterPosePrePTAM[8] << " " << filterPosePrePTAM[9] << " " <<
 				filterPosePostPTAM[0] << " " << filterPosePostPTAM[1] << " " << filterPosePostPTAM[2] << " " << filterPosePostPTAM[3] << " " << filterPosePostPTAM[4] << " " << filterPosePostPTAM[5] << " " << filterPosePostPTAM[6] << " " << filterPosePostPTAM[7] << " " << filterPosePostPTAM[8] << " " << filterPosePostPTAM[9] << " " << 
 				PTAMResultTransformed[0] << " " << PTAMResultTransformed[1] << " " << PTAMResultTransformed[2] << " " << PTAMResultTransformed[3] << " " << PTAMResultTransformed[4] << " " << PTAMResultTransformed[5] << " " << 
 				scales[0] << " " << scales[1] << " " << scales[2] << " " << 
 				offsets[0] << " " << offsets[1] << " " << offsets[2] << " " << offsets[3] << " " << offsets[4] << " " << offsets[5] << " " <<
 				sums[0] << " " << sums[1] << " " << sums[2] << " " << 
 				PTAMResult[0] << " " << PTAMResult[1] << " " << PTAMResult[2] << " " << PTAMResult[3] << " " << PTAMResult[4] << " " << PTAMResult[5] << " " <<
-				videoFramePing << std::endl;
+				PTAMResultSE3TwistOrg[0] << " " << PTAMResultSE3TwistOrg[1] << " " << PTAMResultSE3TwistOrg[2] << " " << PTAMResultSE3TwistOrg[3] << " " << PTAMResultSE3TwistOrg[4] << " " << PTAMResultSE3TwistOrg[5] << " " <<
+				videoFramePing << " " << mimFrameTimeRos_workingCopy << " " << mimFrameSEQ_workingCopy << std::endl;
 
 		pthread_mutex_unlock(&(node->logPTAM_CS));
 	}
@@ -883,17 +902,20 @@ void PTAMWrapper::newNavdata(ardrone_autonomy::Navdata* nav)
 
 void PTAMWrapper::newImage(sensor_msgs::ImageConstPtr img)
 {
-	// copy to internal image, convert to bw, set flag.
-	if(ros::Time::now() - img->header.stamp > ros::Duration(30.0))
-		mimFrameTime = getMS(ros::Time::now()-ros::Duration(0.001));
-	else
-		mimFrameTime = getMS(img->header.stamp);
-
 
 	// convert to CVImage
 	cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::MONO8);
 
 
+	boost::unique_lock<boost::mutex> lock(new_frame_signal_mutex);
+
+	// copy to internal image, convert to bw, set flag.
+	if(ros::Time::now() - img->header.stamp > ros::Duration(30.0))
+		mimFrameTimeRos = (ros::Time::now()-ros::Duration(0.001));
+	else
+		mimFrameTimeRos = (img->header.stamp);
+
+	mimFrameTime = getMS(mimFrameTimeRos);
 
 	//mimFrameTime = getMS(img->header.stamp);
 	mimFrameSEQ = img->header.seq;
@@ -905,6 +927,9 @@ void PTAMWrapper::newImage(sensor_msgs::ImageConstPtr img)
 
 	memcpy(mimFrameBW.data(),cv_ptr->image.data,img->width * img->height);
 	newImageAvailable = true;
+
+	lock.unlock();
+	new_frame_signal.notify_all();
 }
 
 

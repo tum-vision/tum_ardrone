@@ -84,7 +84,7 @@ bool KIFlyTo::update(const tum_ardrone::filter_stateConstPtr statePtr)
 	double diffDistSquared = diffs[0] * diffs[0] + diffs[1] * diffs[1] + diffs[2] * diffs[2];
 
 	// if not reached yet, need to get within small radius to count.
-	if(!reached && diffDistSquared < initialReachedDist * initialReachedDist && diffYaw < 5)
+	if(!reached && diffDistSquared < initialReachedDist * initialReachedDist && diffYaw*diffYaw < 25)
 	{
 		reached = true;
 		reachedAtClock = getMS();
@@ -92,7 +92,7 @@ bool KIFlyTo::update(const tum_ardrone::filter_stateConstPtr statePtr)
 	}
 
 	// if too far away again: revoke reached status...
-	if(reached && (diffDistSquared > stayWithinDist * stayWithinDist || diffYaw > 5))
+	if(reached && (diffDistSquared > stayWithinDist * stayWithinDist || diffYaw*diffYaw > 25))
 	{
 		reached = false;
 		printf("target lost again!\n");
