@@ -353,6 +353,7 @@ void MapView::plotMapPoints()
 	glLineWidth(width*lineWidthFactor);
 	glBegin(GL_LINES);
 	glColor3f(1,0,0);
+	glLineWidth(2.0f);
 
 	std::vector<tvec3>* mpl = &(ptamWrapper->mapPointsTransformed);
 	

@@ -48,7 +48,7 @@ public slots:
 	void SendClicked();
 	void ClearSendClicked();
 	void ResetClicked();
-	void FlattrimClicked();
+	void FlatTrimClicked();
 
 	void LoadFileChanged(QString val);
 	void ToggledUseHovering(int val);
