@@ -347,13 +347,13 @@ void MapView::plotMapPoints()
 	glScaled(0.1,0.1,0.1);
 	CVD::glMultMatrix(mse3ViewerFromWorld);
 	SetupFrustum();
-	float width = 1.0f;
-	float len = 0.02f;
+	float width = 3.0f;
+	float len = 0.04f;
 
 	glLineWidth(width*lineWidthFactor);
 	glBegin(GL_LINES);
 	glColor3f(1,0,0);
-	glLineWidth(2.0f);
+	glLineWidth(5.0f);
 
 	std::vector<tvec3>* mpl = &(ptamWrapper->mapPointsTransformed);
 	

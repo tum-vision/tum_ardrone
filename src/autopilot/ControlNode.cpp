@@ -207,7 +207,8 @@ void ControlNode::popNextCommand(const tum_ardrone::filter_stateConstPtr statePt
 		// setMaxControl
 		else if(sscanf(command.c_str(),"setMaxControl %f",&parameters[0]) == 1)
 		{
-			parameter_MaxControl = parameters[0];
+			controller.agressiveness = parameters[0];
+			printf("maxControl: %f!\n", parameters[0]);
 			commandUnderstood = true;
 		}
 
