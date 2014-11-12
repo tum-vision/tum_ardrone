@@ -33,7 +33,7 @@ int main(int argc, char **argv)
 {
 
   
-	drone_mode = "Live";
+
   ROS_INFO("Started TUM ArDrone Stateestimation Node.");
 	ros::init(argc, argv,"drone_stateestimation",ros::init_options::AnonymousName);
 	ros::NodeHandle nh("~");

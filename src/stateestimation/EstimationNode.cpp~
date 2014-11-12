@@ -250,7 +250,7 @@ void EstimationNode::ptamCb(const std_msgs::StringConstPtr str)
 	if (str->data.length() > 2 && str->data.substr(0,5) == "reset")
 	{
 		printf("Reset\n");
-		publishCommand("p reset");
+		publishCommand("P reset");
 		//PTAMWrapper->publishCommand("p reset");
 	}
 	else if (str->data.length() > 2 && str->data.substr(0,6) == "finish")
