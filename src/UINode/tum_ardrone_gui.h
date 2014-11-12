@@ -32,13 +32,14 @@ class RosThread;
 class PingThread;
 struct ControlCommand;
 
-enum ControlSource {CONTROL_KB = 0, CONTROL_JOY = 1, CONTROL_AUTO = 2, CONTROL_NONE = 3};
+enum ControlSource {CONTROL_KB = 0, CONTROL_JOY = 1, CONTROL_AUTO = 2, CONTROL_NONE = 3, CONTROL_LEAP = 4};
 
 class tum_ardrone_gui : public QWidget
 {
     Q_OBJECT
 
 public slots:
+    void CallAnimationClicked();
 	void LandClicked();
 	void TakeoffClicked();
 	void ToggleCamClicked();
@@ -50,6 +51,7 @@ public slots:
 	void ResetClicked();
 	void FlatTrimClicked();
 
+    void AnimationBoxChanged(QString val);
 	void LoadFileChanged(QString val);
 	void ToggledUseHovering(int val);
 	void ToggledPingDrone(int val);
@@ -111,6 +113,7 @@ protected:
     int mapKey(int k);
     bool isPressed[8];	//{j k l i u o q a}
     unsigned int lastRepeat[8];
+    int Animation_mode_;
 
 
 private:

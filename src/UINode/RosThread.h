@@ -32,6 +32,21 @@
 #include "sensor_msgs/Joy.h"
 #include "std_srvs/Empty.h"
 #include "std_msgs/Empty.h"
+#include "ardrone_autonomy/FlightAnim.h"
+#include <std_msgs/Int16.h>
+
+
+enum Animation_Type
+{
+    ARDRONE_ANIM_PHI_M30_DEG, ARDRONE_ANIM_PHI_30_DEG, ARDRONE_ANIM_THETA_M30_DEG, ARDRONE_ANIM_THETA_30_DEG,
+    ARDRONE_ANIM_THETA_20DEG_YAW_200DEG, ARDRONE_ANIM_THETA_20DEG_YAW_M200DEG, ARDRONE_ANIM_TURNAROUND,
+    ARDRONE_ANIM_TURNAROUND_GODOWN, ARDRONE_ANIM_YAW_SHAKE, ARDRONE_ANIM_YAW_DANCE, ARDRONE_ANIM_PHI_DANCE,
+    ARDRONE_ANIM_THETA_DANCE, ARDRONE_ANIM_VZ_DANCE, ARDRONE_ANIM_WAVE, ARDRONE_ANIM_PHI_THETA_MIXED,
+    ARDRONE_ANIM_DOUBLE_PHI_THETA_MIXED, ARDRONE_ANIM_FLIP_AHEAD, ARDRONE_ANIM_FLIP_BEHIND, ARDRONE_ANIM_FLIP_LEFT,
+    ARDRONE_ANIM_FLIP_RIGHT
+};
+
+
 
 class tum_ardrone_gui;
 
@@ -75,6 +90,14 @@ private:
 	ros::Subscriber takeoff_sub;
 	ros::Subscriber land_sub;
 	ros::Subscriber toggleState_sub;
+    ros::ServiceClient animation_srv;
+    ardrone_autonomy::FlightAnim animation_srv_srvs;
+    ros::Subscriber leapMotion_sub;
+    ros::Subscriber leapTakeoff_sub;
+    ros::Subscriber leapLand_sub;
+    ros::Subscriber leapGesture_sub;
+    int joystick_type_;
+
 
 
 	ros::NodeHandle nh_;
@@ -96,6 +119,34 @@ public:
 	void startSystem();
 	void stopSystem();
 
+    static std::map<std::string,int> Animation_map;
+
+    static std::map<std::string,int> create_map()
+            {
+              std::map<std::string,int> m;
+              m["ARDRONE_ANIM_PHI_M30_DEG"] =  0;
+              m["ARDRONE_ANIM_PHI_30_DEG"] =  1;
+              m["ARDRONE_ANIM_THETA_M30_DEG"] =  2;
+              m["ARDRONE_ANIM_THETA_30_DEG"] =  3;
+              m["ARDRONE_ANIM_THETA_20DEG_YAW_200DEG"] =  4;
+              m["ARDRONE_ANIM_THETA_20DEG_YAW_M200DEG"] =  5;
+              m["ARDRONE_ANIM_TURNAROUND"] =  6;
+              m["ARDRONE_ANIM_TURNAROUND_GODOWN"] =  7;
+              m["ARDRONE_ANIM_YAW_SHAKE"] =  8;
+              m["ARDRONE_ANIM_YAW_DANCE"] =  9;
+              m["ARDRONE_ANIM_PHI_DANCE"] =  10;
+              m["ARDRONE_ANIM_THETA_DANCE"] =  11;
+              m["ARDRONE_ANIM_VZ_DANCE"] =  12;
+              m["ARDRONE_ANIM_WAVE"] =  13;
+              m["ARDRONE_ANIM_PHI_THETA_MIXED"] =  14;
+              m["ARDRONE_ANIM_DOUBLE_PHI_THETA_MIXED"] =  15;
+              m["ARDRONE_ANIM_FLIP_AHEAD"] =  16;
+              m["ARDRONE_ANIM_FLIP_BEHIND"] =  17;
+              m["ARDRONE_ANIM_FLIP_LEFT"] =  18;
+              m["ARDRONE_ANIM_FLIP_RIGHT"] =  19;
+              return m;
+            }
+
 	tum_ardrone_gui* gui;
 
 
@@ -108,6 +159,12 @@ public:
 	void landCb(std_msgs::EmptyConstPtr);
 	void toggleStateCb(std_msgs::EmptyConstPtr);
 	void takeoffCb(std_msgs::EmptyConstPtr);
+    void leapTakeoffCb(std_msgs::EmptyConstPtr);
+    void leapLandCb(std_msgs::EmptyConstPtr);
+    void leapMotionCb(geometry_msgs::TwistConstPtr leap_twist);
+    void leapGestureCb(std_msgs::Int16 msg);
+
+
 	ControlCommand lastJoyControlSent;
 	bool lastL1Pressed;
 	bool lastR1Pressed;
@@ -123,6 +180,9 @@ public:
 	void sendToggleState();
 	void sendToggleCam();
 	void sendFlattrim();
+    void sendAnimation(int _type, uint32_t _duration=0);
+
 };
+
 
 #endif /* __ROSTHREAD_H */
