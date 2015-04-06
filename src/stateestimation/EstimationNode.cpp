@@ -319,9 +319,8 @@ void EstimationNode::dynConfCb(tum_ardrone::StateestimationParamsConfig &config,
 	ptamWrapper->mapLocked = config.PTAMMapLock;
 	filter->allSyncLocked = config.PTAMSyncLock;
 
-
-	ptamWrapper->setPTAMPars(config.PTAMMinKFTimeDiff, config.PTAMMinKFWiggleDist, config.PTAMMinKFDist);
-
+    ptamWrapper->setPTAMPars(config.PTAMMinKFTimeDiff, config.PTAMMinKFWiggleDist, config.PTAMMinKFDist,
+                             config.MinTolerance, config.MaxTolerance);
 
 	filter->c1 = config.c1;
 	filter->c2 = config.c2;

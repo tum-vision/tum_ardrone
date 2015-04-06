@@ -117,7 +117,7 @@ void PTAMWrapper::ResetInternal()
 	mpMapMaker = new MapMaker(*mpMap, *mpCamera);
 	mpTracker = new Tracker(CVD::ImageRef(frameWidth, frameHeight), *mpCamera, *mpMap, *mpMapMaker);
 
-	setPTAMPars(minKFTimeDist, minKFWiggleDist, minKFDist);
+    setPTAMPars(minKFTimeDist, minKFWiggleDist, minKFDist, min_tol, max_tol);
 
 	predConvert->setPosRPY(0,0,0,0,0,0);
 	predIMUOnlyForScale->setPosRPY(0,0,0,0,0,0);
@@ -135,7 +135,8 @@ void PTAMWrapper::ResetInternal()
 	node->publishCommand("u l PTAM has been reset.");
 }
 
-void PTAMWrapper::setPTAMPars(double minKFTimeDist, double minKFWiggleDist, double minKFDist)
+void PTAMWrapper::setPTAMPars(double minKFTimeDist, double minKFWiggleDist, double minKFDist,
+                              double min_tol, double max_tol)
 {
 	if(mpMapMaker != 0)
 		mpMapMaker->minKFDist = minKFDist;
@@ -144,9 +145,16 @@ void PTAMWrapper::setPTAMPars(double minKFTimeDist, double minKFWiggleDist, doub
 	if(mpTracker != 0)
 		mpTracker->minKFTimeDist = minKFTimeDist;
 
+    if(mpMapMaker != 0)
+        mpMapMaker->min_tol = min_tol;
+    if(mpMapMaker != 0)
+        mpMapMaker->max_tol = max_tol;
+
 	this->minKFDist = minKFDist;
 	this->minKFWiggleDist = minKFWiggleDist;
 	this->minKFTimeDist = minKFTimeDist;
+    this->min_tol = min_tol;
+    this->max_tol = max_tol;
 }
 
 PTAMWrapper::~PTAMWrapper(void)

@@ -16,6 +16,7 @@
 #include <gvars3/instances.h>
 #include <fstream>
 #include <algorithm>
+#include "ros/ros.h"
 
 #ifdef WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -337,7 +338,6 @@ bool MapMaker::InitFromStereo(KeyFrame &kF,
   RefreshSceneDepth(pkSecond);
   mdWiggleScaleDepthNormalized = mdWiggleScale / pkFirst->dSceneDepthMean;
 
-
   AddSomeMapPoints(0);
   AddSomeMapPoints(3);
   AddSomeMapPoints(1);
@@ -386,7 +386,12 @@ bool MapMaker::InitFromStereo(KeyFrame &kF,
 	imuTrans = imuTrans / sqrt((double)(imuTrans*imuTrans));
 	double angle = 180*acos((double)(ptamTrans * imuTrans))/3.1415;
 
-	
+    if (initialScaleFactor < min_tol || initialScaleFactor > max_tol){
+        printf("\nEstimated scale factor is not within the tolerance range (%.1f): try again!\n",
+               initialScaleFactor * 1.2);
+        return false;
+    }
+
 	if(angle > 6000)
 	{
 		printf("\nAngle between estimated Translation is too large (%.1f): try again!\n",angle);
