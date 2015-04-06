@@ -407,7 +407,56 @@ void ControlNode::publishCommand(std::string c)
 
 void ControlNode::toogleLogging()
 {
-	// logging has yet to be integrated.
+	// first: always check for /log dir
+	struct stat st;
+	if(stat((packagePath+std::string("/logs")).c_str(),&st) != 0)
+		mkdir((packagePath+std::string("/logs")).c_str(),S_IXGRP | S_IXOTH | S_IXUSR | S_IRWXU | S_IRWXG | S_IROTH);
+
+	char buf[200];
+	bool quitLogging = false;
+	if(logfileControl == 0)
+	{
+		currentLogID = ((long)time(0))*100+(getMS()%100);		// time(0) + ms
+		startedLogClock = getMS();
+		ROS_INFO("\n\nENABLED LOGGING to %s/logs/%ld\n\n\n",packagePath.c_str(),currentLogID);
+		sprintf(buf,"%s/logs/%ld",packagePath.c_str(),currentLogID);
+		mkdir(buf, S_IXGRP | S_IXOTH | S_IXUSR | S_IRWXU | S_IRWXG | S_IROTH);
+
+
+		sprintf(buf,"u l ENABLED LOGGING to %s/logs/%ld",packagePath.c_str(),currentLogID);
+		publishCommand(buf);
+	}
+	else
+		quitLogging = true;
+
+
+
+	// IMU
+	pthread_mutex_lock(&logControl_CS);
+	if(logfileControl == 0)
+	{
+		logfileControl = new std::ofstream();
+		sprintf(buf,"%s/logs/%ld/logControl.txt",packagePath.c_str(),currentLogID);
+		logfileControl->open (buf);
+	}
+	else
+	{
+		logfileControl->flush();
+		logfileControl->close();
+		delete logfileControl;
+		logfileControl = NULL;
+	}
+	pthread_mutex_unlock(&logControl_CS);
+
+
+	if(quitLogging)
+	{
+		printf("\n\nDISABLED LOGGING (logged %ld sec)\n\n\n",(getMS()-startedLogClock+500)/1000);
+		char buf2[200];
+		sprintf(buf,"%s/logs/%ld",packagePath.c_str(),currentLogID);
+		sprintf(buf2,"%s/logs/%ld-%lds",packagePath.c_str(),currentLogID,(getMS()-startedLogClock+500)/1000);
+		rename(buf,buf2);
+	}
 }
 
 void ControlNode::sendControlToDrone(ControlCommand cmd)

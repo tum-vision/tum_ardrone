@@ -37,6 +37,7 @@
 #include "tum_ardrone/SetStayWithinDistance.h"
 #include "tum_ardrone/SetStayTime.h"
 #include "std_srvs/Empty.h"
+#include <fstream>
 
 class DroneKalmanFilter;
 class MapView;
@@ -146,6 +147,8 @@ public:
 	// logging stuff
 	std::ofstream* logfileControl;
 	static pthread_mutex_t logControl_CS;
+	long currentLogID;
+	long startedLogClock;
 	void toogleLogging();	// switches logging on or off.
 
 	// other internals
