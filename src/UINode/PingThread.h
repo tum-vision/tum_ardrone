@@ -20,9 +20,11 @@
  */
 #ifndef __PINGTHREAD_H
 #define __PINGTHREAD_H
- 
- 
+
+
 #include "cvd/thread.h"
+#include <string>
+
 
 class tum_ardrone_gui;
 class RosThread;
@@ -36,13 +38,14 @@ private:
 
 	// keep Running
 	bool keepRunning;
-
+    bool started;
 
 	// buffers
     char pingCommand500[100];
     char pingCommand20000[100];
     char line1[200];
     char line2[200];
+    std::string ip;
 
 
     // running averages
@@ -59,6 +62,8 @@ public:
 	// to be called externally
 	void startSystem();
 	void stopSystem();
+
+	void setIp(std::string);
 
 	// start and stop pinging
 	void setEnabled(bool);
