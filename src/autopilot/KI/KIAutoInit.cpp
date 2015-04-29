@@ -105,8 +105,15 @@ bool KIAutoInit::update(const tum_ardrone::filter_stateConstPtr statePtr)
 		case STARTED:	// wait 6s to reach hight.
 			if(getMS() - stageStarted > reachHeightMS)
 			{
-				stageStarted = getMS();
-				stage = WAIT_FOR_FIRST;
+			    // check that the drone is actually flying
+
+			    if (statePtr->droneState >=3 && statePtr->droneState <= 7 ) {
+                    stageStarted = getMS();
+                    stage = WAIT_FOR_FIRST;
+			    } else {
+                    // something went wrong, try again
+                    stage = NONE;
+			    }
 			}
 			node->sendControlToDrone(node->hoverCommand);
 			return false;

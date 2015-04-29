@@ -1001,6 +1001,10 @@ bool PTAMWrapper::handleCommand(std::string s)
 {
 	if(s.length() == 5 && s.substr(0,5) == "space")
 	{
+	    if (mpTracker == 0) {
+            ROS_INFO("Haven't received the first video frame yet, can't start the tracker");
+            return true;
+	    }
   		mpTracker->pressSpacebar();
 	}
 
