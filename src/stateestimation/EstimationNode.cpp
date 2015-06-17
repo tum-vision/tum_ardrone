@@ -104,6 +104,7 @@ EstimationNode::EstimationNode()
 	arDroneVersion = 0;
 	//memset(&lastNavdataReceived,0,sizeof(ardrone_autonomy::Navdata));
 
+    initialYaw = 0;
 
 }
 
@@ -239,8 +240,19 @@ void EstimationNode::comCb(const std_msgs::StringConstPtr str)
 		this->toogleLogging();
 	}
 
+	// hack to handle the setinitialstate command
 
+		// only handle commands with prefix c
+	if(str->data.length() > 2 && str->data.substr(0,2) == "c ")
+	{
 
+		float parameter;
+		// setInitialYaw
+		if(sscanf(str->data.c_str(),"c setInitialYaw %f",&parameter) == 1)
+		{
+			initialYaw = parameter;
+		}
+	}
 
 
 	int a, b;

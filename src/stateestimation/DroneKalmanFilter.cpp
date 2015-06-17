@@ -363,13 +363,13 @@ void DroneKalmanFilter::observeIMU_RPY(const ardrone_autonomy::Navdata* nav)
 
 	if(!baselinesYValid)	// only for initialization.
 	{
-		baselineY_IMU = nav->rotZ;
+		baselineY_IMU = nav->rotZ - node->initialYaw;
 		baselineY_Filter = yaw.state[0];
 		baselinesYValid = true;
 		timestampYawBaselineFrom = getMS(nav->header.stamp);
 	}
 
-	double imuYawDiff = (nav->rotZ - baselineY_IMU );
+	double imuYawDiff = (nav->rotZ - node->initialYaw - baselineY_IMU );
 	double observedYaw = baselineY_Filter + imuYawDiff;
 
 	yaw.state[0] =  angleFromTo(yaw.state[0],-180,180);

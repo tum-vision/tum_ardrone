@@ -20,7 +20,7 @@
  */
 #ifndef __ESTIMATIONNODE_H
 #define __ESTIMATIONNODE_H
- 
+
 
 #include "ros/ros.h"
 #include "geometry_msgs/Twist.h"
@@ -134,7 +134,7 @@ public:
 	void toogleLogging();	// switches logging on or off.
 	std::string calibFile;
 	int arDroneVersion;
-
+    float initialYaw;
 
 };
 #endif /* __ESTIMATIONNODE_H */
