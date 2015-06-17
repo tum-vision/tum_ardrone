@@ -132,8 +132,7 @@ void ControlNode::droneposeCb(const tum_ardrone::filter_stateConstPtr statePtr)
 	}
 	else if(isControlling)
 	{
-		sendControlToDrone(hoverCommand);
-		ROS_DEBUG("Autopilot is Controlling, but there is no KI -> sending HOVER");
+		sendControlToDrone(controller.update(statePtr));
 	}
 
 
@@ -483,7 +482,7 @@ void ControlNode::stopControl() {
 }
 
 void ControlNode::updateControl(const tum_ardrone::filter_stateConstPtr statePtr) {
-	if (currentKI->update(statePtr) && commandQueue.size() > 0) {
+	if (currentKI->update(statePtr)) {
 		delete currentKI;
 		currentKI = NULL;
 	}
