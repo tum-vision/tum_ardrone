@@ -23,6 +23,14 @@
 #include "../ControlNode.h"
 #include "../../HelperFunctions.h"
 
+// transform degree-angle to satisfy min <= angle < sup
+double angleFromTo(double angle, double min, double sup)
+{
+        while(angle < min) angle += 360;
+        while(angle >=  sup) angle -= 360;
+        return angle;
+}
+
 
 KIFlyTo::KIFlyTo(DronePosition checkpointP, 
 		double stayTime,
@@ -80,7 +88,11 @@ bool KIFlyTo::update(const tum_ardrone::filter_stateConstPtr statePtr)
 			statePtr->y - checkpoint.pos[1],
 			statePtr->z - checkpoint.pos[2]);
 
-	double diffYaw = statePtr->yaw - checkpoint.yaw;
+	double checkpointYaw = angleFromTo(checkpoint.yaw, -180, 180);
+	double stateYaw = angleFromTo(statePtr->yaw, -180, 180);
+
+	double diffYaw = stateYaw - checkpointYaw;
+ 	diffYaw = angleFromTo(diffYaw, -180, 180);
 	double diffDistSquared = diffs[0] * diffs[0] + diffs[1] * diffs[1] + diffs[2] * diffs[2];
 
 	// if not reached yet, need to get within small radius to count.
