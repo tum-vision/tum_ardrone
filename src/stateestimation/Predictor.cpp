@@ -123,15 +123,21 @@ void Predictor::predictOneStep(ardrone_autonomy::Navdata* nfo)
 	x += sin(yawRad)*dxDrone+cos(yawRad)*dyDrone;
 	y += cos(yawRad)*dxDrone-sin(yawRad)*dyDrone;
 
-	// height
-	if(abs(z - (double)nfo->altd*0.001) > 0.12)
-	{
-		if(std::abs(z - (double)nfo->altd*0.001) > abs(zCorruptedJump))
-			zCorruptedJump = z - (double)nfo->altd*0.001;
-		zCorrupted = true;
-	}
+	double alt = (nfo->altd*0.001) / sqrt(1.0 + (tan(nfo->rotX * 3.14159268 / 180)*tan(nfo->rotX * 3.14159268 / 180)) \
+		+ (tan(nfo->rotY * 3.14159268 / 180)*tan(nfo->rotY * 3.14159268 / 180)) );
 
-	z = nfo->altd*0.001;
+	if (! std::isfinite(alt))
+		alt = nfo->altd * 0.001;
+
+ 	// height
+	if(abs(z - alt) > 0.12)
+ 	{
+		if(std::abs(z - alt) > abs(zCorruptedJump))
+			zCorruptedJump = z - alt;
+ 		zCorrupted = true;
+ 	}
+
+	z = alt;
 
 	// angles
 	roll = nfo->rotX/1000.0;

@@ -775,7 +775,7 @@ TooN::Vector<3> PTAMWrapper::evalNavQue(unsigned int from, unsigned int to, bool
 	pthread_mutex_lock(&navInfoQueueCS);
 	int skipped=0;
 	int used = 0;
-	int firstZ = 0;
+	double firstZ = 0;
 
 	float sum_first=0, num_first=0, sum_last=0, num_last=0;
 	int pressureAverageRange = 100;
@@ -822,8 +822,15 @@ TooN::Vector<3> PTAMWrapper::evalNavQue(unsigned int from, unsigned int to, bool
 			if(firstAdded == 0) 
 			{
 				firstAdded = frontStamp;
-				firstZ = cur->altd;
-				predIMUOnlyForScale->z = firstZ*0.001;	// avoid height check initially!
+				firstZ = (cur->altd * 0.001) / sqrt(1.0 + (tan(cur->rotX * 3.14159268 / 180)*tan(cur->rotX * 3.14159268 / 180)) \
+					+ (tan(cur->rotY * 3.14159268 / 180)*tan(cur->rotY * 3.14159268 / 180)) );
+
+				if (! std::isfinite(firstZ))
+					firstZ = cur->altd * 0.001;
+
+
+				predIMUOnlyForScale->z = firstZ;	// avoid height check initially!
+
 			}
 			lastAdded = frontStamp;
 			// add
@@ -837,7 +844,7 @@ TooN::Vector<3> PTAMWrapper::evalNavQue(unsigned int from, unsigned int to, bool
 
 	}
 	//printf("QueEval: before: %i; skipped: %i, used: %i, left: %i\n", totSize, skipped, used, navInfoQueue.size());
-	predIMUOnlyForScale->z -= firstZ*0.001;	// make height to height-diff
+	predIMUOnlyForScale->z -= firstZ;	// make height to height-diff
 
 	*zCorrupted = predIMUOnlyForScale->zCorrupted;
 	*allCorrupted = abs(firstAdded - (int)from) + abs(lastAdded - (int)to) > 80;
