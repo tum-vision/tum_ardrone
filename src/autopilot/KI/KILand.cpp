@@ -45,5 +45,6 @@ bool KILand::update(const tum_ardrone::filter_stateConstPtr statePtr)
 
 	// TODO: maybe do something better here, like still controlling x, y, yaw pos...
 	node->sendControlToDrone(node->hoverCommand);
+	controller->clearTarget();
 	return true;
 }

@@ -113,6 +113,7 @@ tum_ardrone_gui::~tum_ardrone_gui()
 // clicked functions
 void tum_ardrone_gui::LandClicked()
 {
+   	rosThread->publishCommand("c clearCommands");
 	rosThread->sendLand();
 }
 void tum_ardrone_gui::TakeoffClicked()
