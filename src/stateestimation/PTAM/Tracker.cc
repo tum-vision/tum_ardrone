@@ -843,6 +843,7 @@ void Tracker::TrackMap()
       m.v2RootPos = (*it)->v2Found;
       m.nLevel = (*it)->nSearchLevel;
       m.bSubPix = (*it)->bDidSubPix; 
+      m.Source = Measurement::SRC_TRACKER;
       mCurrentKF.mMeasurements[& ((*it)->Point)] = m;
     }
   
