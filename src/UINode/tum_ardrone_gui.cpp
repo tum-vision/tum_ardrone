@@ -123,7 +123,7 @@ void tum_ardrone_gui::ToggleCamClicked()
 {
 	rosThread->sendToggleCam();
 }
-void tum_ardrone_gui::FlattrimClicked()
+void tum_ardrone_gui::FlatTrimClicked()
 {
 	rosThread->sendFlattrim();
 }
