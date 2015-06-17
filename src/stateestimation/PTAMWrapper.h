@@ -98,6 +98,9 @@ private:
 	double minKFWiggleDist;
 	double minKFDist;
 
+    double min_tol;
+    double max_tol;
+
 
 	Predictor* imuOnlyPred;	
 	int lastScaleEKFtimestamp;
@@ -154,7 +157,8 @@ public:
 	void newImage(sensor_msgs::ImageConstPtr img);
 	void newNavdata(ardrone_autonomy::Navdata* nav);
 	bool newImageAvailable;
-	void setPTAMPars(double minKFTimeDist, double minKFWiggleDist, double minKFDist);
+    void setPTAMPars(double minKFTimeDist, double minKFWiggleDist, double minKFDist,
+                     double min_tol, double max_tol);
 
 	bool handleCommand(std::string s);
 	bool mapLocked;
@@ -172,12 +176,9 @@ public:
 	// resets PTAM tracking
 	inline void Reset() {resetPTAMRequested = true;};
 
-
 	// start and stop system and respective thread.
 	void startSystem();
 	void stopSystem();
-
-
 
 	enum {PTAM_IDLE = 0, PTAM_INITIALIZING = 1, PTAM_LOST = 2, PTAM_GOOD = 3, PTAM_BEST = 4, PTAM_TOOKKF = 5, PTAM_FALSEPOSITIVE = 6} PTAMStatus;
 	TooN::SE3<> lastPTAMResultRaw;

@@ -60,12 +60,20 @@ public:
   bool NeedNewKeyFrame(KeyFrame &kCurrent);            // Is it a good camera pose to add another KeyFrame?
   bool IsDistanceToNearestKeyFrameExcessive(KeyFrame &kCurrent);  // Is the camera far away from the nearest KeyFrame (i.e. maybe lost?)
   
+  void SetMinTolerance(double min_tol){
+      this->min_tol = min_tol;
+  }
+
   double initialScaleFactor;
   double currentScaleFactor;	// set exgternally for metric scale.
   double minKFWiggleDist;
   double minKFDist;
   double lastMetricDist;
   double lastWiggleDist;
+
+  //Tolerance Interval
+  double min_tol;
+  double max_tol;
 
 protected:
   
@@ -136,8 +144,6 @@ protected:
   bool mbBundleAbortRequested;      // We should stop bundle adjustment
   bool mbBundleRunning;             // Bundle adjustment is running
   bool mbBundleRunningIsRecent;     //    ... and it's a local bundle adjustment.
-
-  
 };
 
 #endif
