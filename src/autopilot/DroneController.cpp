@@ -80,6 +80,20 @@ ControlCommand DroneController::update(tum_ardrone::filter_stateConstPtr state)
 		ROS_WARN("Warning: no valid target, sending hover.");
 	}
 
+	if(node->logfileControl != NULL)
+	{
+		pthread_mutex_lock(&node->logControl_CS);
+		if(node->logfileControl != NULL)
+        {
+			(*(node->logfileControl)) << lastTimeStamp << " ";
+
+			for( int i = 0; i < logInfo.size(); i++)
+                (*(node->logfileControl)) << logInfo[i] << " ";
+
+            (*(node->logfileControl)) << "\n";
+        }
+		pthread_mutex_unlock(&node->logControl_CS);
+	}
 	last_err = new_err;
 	return lastSentControl;
 }
