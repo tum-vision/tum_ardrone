@@ -411,8 +411,17 @@ ControlCommand tum_ardrone_gui::calcKBControl()
 	if(isPressed[3]) c.pitch = -sensRP; // i
 	if(isPressed[4]) c.yaw = -sensYaw; // u
 	if(isPressed[5]) c.yaw = sensYaw; // o
-	if(isPressed[6]) c.gaz = sensRP; // q
-	if(isPressed[7]) c.gaz = -sensRP; // a
+	if(isPressed[6]) c.gaz = sensGaz; // q
+	if(isPressed[7]) c.gaz = -sensGaz; // a
 
 	return c;
+}
+
+
+void tum_ardrone_gui::dynConfCb(tum_ardrone::GUIParamsConfig &config, uint32_t level)
+{
+    pingThread->setIp(config.DroneIP);
+    sensRP = config.KBsensRP;
+    sensYaw = config.KBsensYaw;
+    sensGaz = config.KBsensGAZ;
 }

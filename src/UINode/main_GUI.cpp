@@ -17,7 +17,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with tum_ardrone.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
 #include "tum_ardrone_gui.h"
 #include "RosThread.h"
 #include "PingThread.h"
@@ -49,6 +49,12 @@ int main(int argc, char *argv[])
     p.gui = &w;
     p.rosThread = &t;
     w.pingThread = &p;
+
+
+    dynamic_reconfigure::Server<tum_ardrone::GUIParamsConfig> srv;
+    dynamic_reconfigure::Server<tum_ardrone::GUIParamsConfig>::CallbackType f;
+    f = boost::bind(&tum_ardrone_gui::dynConfCb, &w, _1, _2);
+    srv.setCallback(f);
 
     // start them.
     t.startSystem();

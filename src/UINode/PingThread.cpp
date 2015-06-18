@@ -31,7 +31,9 @@ PingThread::PingThread()
 	line1[0] = '\0';
 	line2[0] = '\0';
 	keepRunning = true;
+	started = false;
 	measure = true;
+	ip = std::string("");
 
 	p500 = 25;
 	p20000 = 50;
@@ -58,6 +60,18 @@ void PingThread::stopSystem()
 	join();
 }
 
+void PingThread::setIp(std::string newip)
+{
+    bool wasRunning = started;
+    if (wasRunning)
+        stopSystem();
+
+    ip = newip;
+
+    if (wasRunning)
+        startSystem();
+}
+
 double parsePingResult(std::string s)
 {
 	// 20008 bytes from localhost (127.0.0.1): icmp_req=1 ttl=64 time=0.075 ms
@@ -76,9 +90,9 @@ double parsePingResult(std::string s)
 void PingThread::run()
 {
 	std::cout << "Starting PING Thread" << std::endl;
-
-	sprintf(pingCommand20000,"ping -c 1 -s 20000 -w 1 192.168.1.1");
-	sprintf(pingCommand500,"ping -c 1 -s 500 -w 1 192.168.1.1");
+    started = true;
+	sprintf(pingCommand20000,"ping -c 1 -s 20000 -w 1 %s", ip.c_str());
+	sprintf(pingCommand500,"ping -c 1 -s 500 -w 1 %s", ip.c_str());
 	ros::Rate r(2.0);
 	FILE *p;
 
@@ -112,9 +126,9 @@ void PingThread::run()
 
 			std::cout << "new ping values: 500->" << res500 << " 20000->" << res20000 << std::endl;
 
-			// clip between 10 and 1000.
-			res500 = std::min(1000.0,std::max(10.0,res500));
-			res20000 = std::min(1000.0,std::max(10.0,res20000));
+			// clip between 1 and 1000.
+			res500 = std::min(1000.0,std::max(1.0,res500));
+			res20000 = std::min(1000.0,std::max(1.0,res20000));
 
 			// update
 			p500 = 0.7 * p500 + 0.3 * res500;

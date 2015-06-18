@@ -27,6 +27,8 @@
 #include <QtGui/QWidget>
 #include "ui_tum_ardrone_gui.h"
 #include "geometry_msgs/Twist.h"
+#include <dynamic_reconfigure/server.h>
+#include "tum_ardrone/GUIParamsConfig.h"
 
 class RosThread;
 class PingThread;
@@ -96,6 +98,8 @@ public:
     void setStateestimationInfo(std::string s);
     void setMotorSpeeds(std::string s);
     void closeWindow();
+    void dynConfCb(tum_ardrone::GUIParamsConfig &config, uint32_t level);
+
 
     // calculates KB command, based on currently pressed keys.
     ControlCommand calcKBControl();
