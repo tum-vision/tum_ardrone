@@ -33,7 +33,7 @@ PingThread::PingThread()
 	keepRunning = true;
 	started = false;
 	measure = true;
-    ip = std::string("");
+	ip = std::string("");
 
 	p500 = 25;
 	p20000 = 50;
@@ -126,7 +126,7 @@ void PingThread::run()
 
 			std::cout << "new ping values: 500->" << res500 << " 20000->" << res20000 << std::endl;
 
-			// clip between 10 and 1000.
+			// clip between 1 and 1000.
 			res500 = std::min(1000.0,std::max(1.0,res500));
 			res20000 = std::min(1000.0,std::max(1.0,res20000));
 

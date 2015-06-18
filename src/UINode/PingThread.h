@@ -38,22 +38,22 @@ private:
 
 	// keep Running
 	bool keepRunning;
-    bool started;
+	bool started;
 
 	// buffers
-    char pingCommand500[100];
-    char pingCommand20000[100];
-    char line1[200];
-    char line2[200];
-    std::string ip;
+	char pingCommand500[100];
+	char pingCommand20000[100];
+	char line1[200];
+	char line2[200];
+	std::string ip;
 
 
-    // running averages
-    double p500;
-    double p20000;
+	// running averages
+	double p500;
+	double p20000;
 
-    static const double p500Default = 25;
-    static const double p20000Default = 50;
+	static const double p500Default = 25;
+	static const double p20000Default = 50;
 public:
 	PingThread(void);
 	~PingThread(void);
