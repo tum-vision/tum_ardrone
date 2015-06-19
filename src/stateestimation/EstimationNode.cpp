@@ -531,7 +531,7 @@ void EstimationNode::reSendInfo()
 	// parse PTAM message
 	std::string ptamMsg = ptamWrapper->lastPTAMMessage;
 	int kf, kp, kps[4], kpf[4];
-	int pos = ptamMsg.find("Found: ");
+	size_t pos = ptamMsg.find("Found: ");
 	int found = 0;
 	if(pos != std::string::npos)
 		found = sscanf(ptamMsg.substr(pos).c_str(),"Found: %d/%d %d/%d %d/%d %d/%d Map: %dP, %dKF",
@@ -542,8 +542,6 @@ void EstimationNode::reSendInfo()
 				kf, kp,kpf[0]+kpf[1]+kpf[2]+kpf[3], kps[0]+kps[1]+kps[2]+kps[3]);
 	else
 		snprintf(bufp,200,"Map: -");
-
-	lastNavdataReceived.batteryPercent;
 
 	std::string status = "";
 	switch(	lastNavdataReceived.state)

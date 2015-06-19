@@ -135,7 +135,7 @@ bool KIAutoInit::update(const tum_ardrone::filter_stateConstPtr statePtr)
 			}
 			else	// time is up, take second KF
 			{
-				if(statePtr->ptamState == statePtr->PTAM_INITIALIZING)	// TODO: ptam status enum, this should be PTAM_INITIALIZING
+				if(statePtr->ptamState ==  (unsigned int)statePtr->PTAM_INITIALIZING)	// TODO: ptam status enum, this should be PTAM_INITIALIZING
 				{
 					node->publishCommand("p space");
 					stageStarted = getMS();
@@ -155,7 +155,7 @@ bool KIAutoInit::update(const tum_ardrone::filter_stateConstPtr statePtr)
 		case WAIT_FOR_SECOND:
 
 			// am i done?
-			if(statePtr->ptamState == statePtr->PTAM_BEST || statePtr->ptamState == statePtr->PTAM_GOOD || statePtr->ptamState == statePtr->PTAM_TOOKKF) // TODO: PTAM_GOOD or PTAM_BEST or PTAM_TOOKKF
+			if(statePtr->ptamState ==  (unsigned int)statePtr->PTAM_BEST || statePtr->ptamState ==  (unsigned int)statePtr->PTAM_GOOD || statePtr->ptamState ==  (unsigned int)statePtr->PTAM_TOOKKF) // TODO: PTAM_GOOD or PTAM_BEST or PTAM_TOOKKF
 			{
 				controller->setTarget(DronePosition(
 									TooN::makeVector(statePtr->x,statePtr->y,statePtr->z),statePtr->yaw));

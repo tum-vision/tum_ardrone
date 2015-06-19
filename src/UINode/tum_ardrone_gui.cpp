@@ -401,7 +401,7 @@ ControlCommand tum_ardrone_gui::calcKBControl()
 {
 	// clear keys that have not been refreshed for 1s, it is set to "not pressed"
 	for(int i=0;i<8;i++)
-		isPressed[i] = isPressed[i] && ((lastRepeat[i] + 1000) > getMS());
+		isPressed[i] = isPressed[i] && ((lastRepeat[i] + 1000) > (unsigned int)getMS());
 
 	ControlCommand c;
 
