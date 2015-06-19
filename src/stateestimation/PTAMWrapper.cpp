@@ -196,7 +196,7 @@ void PTAMWrapper::run()
 
 
 	snprintf(charBuf,200,"Video resolution: %d x %d",frameWidth,frameHeight);
-	ROS_INFO(charBuf);
+	ROS_INFO("%s", charBuf);
 	node->publishCommand(std::string("u l ")+charBuf);
 
 	// create window
@@ -498,13 +498,13 @@ void PTAMWrapper::HandleFrame()
 		//filter->useScalingFixpoint = true;
 
 		snprintf(charBuf,500,"locking scale fixpoint to %.3f %.3f %.3f",PTAMResultTransformed[0], PTAMResultTransformed[1], PTAMResultTransformed[2]);
-		ROS_INFO(charBuf);
+		ROS_INFO("%s", charBuf);
 		node->publishCommand(std::string("u l ")+charBuf);
 	}
 
 
 	// ----------------------------- Take KF? -----------------------------------
-	if(!mapLocked && isVeryGood && (forceKF || mpMap->vpKeyFrames.size() < maxKF || maxKF <= 1))
+	if(!mapLocked && isVeryGood && (forceKF || (int)(mpMap->vpKeyFrames.size()) < maxKF || maxKF <= 1))
 	{
 		mpTracker->TakeKF(forceKF);
 		forceKF = false;
@@ -572,7 +572,7 @@ void PTAMWrapper::HandleFrame()
 			fle->flush();
 			fle->close();
 
-			printf("FLUSHED %d KEYPOINTS to file pointcloud.txt\n\n",mapPointsTransformed.size());
+			printf("FLUSHED %lu KEYPOINTS to file pointcloud.txt\n\n",mapPointsTransformed.size());
 
 			flushMapKeypoints = false;
 		}
@@ -812,12 +812,12 @@ TooN::Vector<3> PTAMWrapper::evalNavQue(unsigned int from, unsigned int to, bool
 			)
 	{
 		int frontStamp = getMS(cur->header.stamp);
-		if(frontStamp < from)		// packages before: delete
+		if(frontStamp < (int)from)		// packages before: delete
 		{
 			//navInfoQueue.pop_front();
 			skipped++;
 		}
-		else if(frontStamp >= from && frontStamp <= to)
+		else if(frontStamp >= (int)from && frontStamp <= (int)to)
 		{
 			if(firstAdded == 0) 
 			{
@@ -922,7 +922,7 @@ void PTAMWrapper::newImage(sensor_msgs::ImageConstPtr img)
 
 	// copy to mimFrame.
 	// TODO: make this threadsafe (save pointer only and copy in HandleFrame)
-	if(mimFrameBW.size().x != img->width || mimFrameBW.size().y != img->height)
+	if(mimFrameBW.size().x != (int)(img->width) || mimFrameBW.size().y != (int)(img->height))
 		mimFrameBW.resize(CVD::ImageRef(img->width, img->height));
 
 	memcpy(mimFrameBW.data(),cv_ptr->image.data,img->width * img->height);

@@ -167,12 +167,12 @@ void ControlNode::popNextCommand(const tum_ardrone::filter_stateConstPtr statePt
 		float parameters[10];
 
 		// replace macros
-		if((p = command.find("$POSE$")) != std::string::npos)
+		if((size_t)(p = command.find("$POSE$")) != std::string::npos)
 		{
 			snprintf(buf,100, "%.3f %.3f %.3f %.3f",statePtr->x,statePtr->y,statePtr->z,statePtr->yaw);
 			command.replace(p,6,buf);
 		}
-		if((p = command.find("$REFERENCE$")) != std::string::npos)
+		if((size_t)(p = command.find("$REFERENCE$")) != std::string::npos)
 		{
 			snprintf(buf,100, "%.3f %.3f %.3f %.3f",parameter_referenceZero.pos[0],parameter_referenceZero.pos[1],parameter_referenceZero.pos[2],parameter_referenceZero.yaw);
 			command.replace(p,11,buf);

@@ -56,7 +56,7 @@ ControlCommand DroneController::update(tum_ardrone::filter_stateConstPtr state)
 	TooN::Vector<3> pose = TooN::makeVector(state->x, state->y, state->z);
 	double yaw = state->yaw;
 	TooN::Vector<4> speeds = TooN::makeVector(state->dx, state->dy, state->dz, state->dyaw);
-	ptamIsGood = state->ptamState == state->PTAM_BEST || state->ptamState == state->PTAM_GOOD || state->ptamState == state->PTAM_TOOKKF;
+	ptamIsGood = state->ptamState == (unsigned int)state->PTAM_BEST || state->ptamState ==  (unsigned int)state->PTAM_GOOD || state->ptamState ==  (unsigned int)state->PTAM_TOOKKF;
 	scaleAccuracy = state->scaleAccuracy;
 
 	// calculate (new) errors.
@@ -96,7 +96,7 @@ void DroneController::setTarget(DronePosition newTarget)
 
 	char buf[200];
 	snprintf(buf,200,"New Target: xyz = %.3f, %.3f, %.3f,  yaw=%.3f", target.pos[0],target.pos[1],target.pos[2],target.yaw);
-	ROS_INFO(buf);
+	ROS_INFO("%s", buf);
 
 	if(node != NULL)
 		node->publishCommand(std::string("u l ") + buf);

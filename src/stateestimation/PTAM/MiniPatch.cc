@@ -37,7 +37,6 @@ bool MiniPatch::FindPatch(CVD::ImageRef &irPos,
 			  vector<ImageRef> &vCorners,
 			  std::vector<int> *pvRowLUT)
 {
-  ImageRef irCenter = irPos;
   ImageRef irBest;
   int nBestSSD = mnMaxSSD + 1;
   ImageRef irBBoxTL = irPos - ImageRef(nRange, nRange);
