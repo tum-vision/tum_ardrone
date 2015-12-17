@@ -416,5 +416,11 @@ approximate in "simulation" based on c1 to c8:
 
 ## Licence
 
-The major part of this software package - that is everything except PTAM - is licensed under the GNU General Public License Version 3 (GPLv3), see http://www.gnu.org/licenses/gpl.html. PTAM (comprised of all files in /src/stateestimation/PTAM) has it's own licence, see http://www.robots.ox.ac.uk/~gk/PTAM/download.html. This licence in particular prohibits commercial use of the software.
+## Licence
+
+This software package is licensed under the GNU General Public License Version 3 (GPLv3).
+
+Note: PTAM was initially released in 2008 by Isis Innovation under a license suitable for academic use. That version is also available for commercial use subject to a license agreement with Isis Innovation. That version remains available here: [http://www.robots.ox.ac.uk/~gk/PTAM/](http://www.robots.ox.ac.uk/~gk/PTAM/)
+
+Re-licensed fork of Isis Innovation's PTAM Source Code Release v1.0-r114 can be found [here](https://github.com/Oxford-PTAM/PTAM-GPL).
 
