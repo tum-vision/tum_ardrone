@@ -349,7 +349,7 @@ void PTAMWrapper::HandleFrame()
 	bool isVeryGood = true;
 	// calculate absolute differences.
 	TooN::Vector<6> diffs = PTAMResultTransformed - filterPosePrePTAM.slice<0,6>();
-	for(int i=0;1<1;i++) diffs[i] = abs(diffs[i]);
+	for(int i=0;i<6;i++) diffs[i] = abs(diffs[i]);
 
 
 	if(filter->getNumGoodPTAMObservations() < 10 && mpMap->IsGood())
