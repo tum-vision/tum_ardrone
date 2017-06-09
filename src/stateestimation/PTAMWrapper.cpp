@@ -431,8 +431,6 @@ void PTAMWrapper::HandleFrame()
 	filterPosePostPTAM = filter->getCurrentPoseSpeedAsVec();
 	pthread_mutex_unlock( &filter->filter_CS );
 
-	TooN::Vector<6> filterPosePostPTAMBackTransformed = filter->backTransformPTAMObservation(filterPosePostPTAM.slice<0,6>());
-
 
 	// if interval is started: add one step.
 	int includedTime = mimFrameTime_workingCopy - ptamPositionForScaleTakenTimestamp;
@@ -451,7 +449,7 @@ void PTAMWrapper::HandleFrame()
 
 		if(includedTime >= 2000 && framesIncludedForScaleXYZ > 1)	// ADD! (if too many, was resetted before...)
 		{
-			TooN::Vector<3> diffPTAM = filterPosePostPTAMBackTransformed.slice<0,3>() - PTAMPositionForScale;
+			TooN::Vector<3> diffPTAM = PTAMResult.slice<0,3>() - PTAMPositionForScale;
 			bool zCorrupted, allCorrupted;
 			float pressureStart = 0, pressureEnd = 0;
 			TooN::Vector<3> diffIMU = evalNavQue(ptamPositionForScaleTakenTimestamp - filter->delayVideo + filter->delayXYZ,mimFrameTime_workingCopy - filter->delayVideo + filter->delayXYZ,&zCorrupted, &allCorrupted, &pressureStart, &pressureEnd);
@@ -484,7 +482,7 @@ void PTAMWrapper::HandleFrame()
 		if(framesIncludedForScaleXYZ == -1)	// RESET!
 		{
 			framesIncludedForScaleXYZ = 0;
-			PTAMPositionForScale = filterPosePostPTAMBackTransformed.slice<0,3>();
+			PTAMPositionForScale = PTAMResult.slice<0,3>();
 			//predIMUOnlyForScale->resetPos();	// also resetting z corrupted flag etc. (NOT REquired as reset is done in eval)
 			ptamPositionForScaleTakenTimestamp = mimFrameTime_workingCopy;
 		}
