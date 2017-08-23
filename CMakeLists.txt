@@ -5,7 +5,11 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(tum_ardrone)
 
+
 ## Find catkin macros and libraries
+find_package(OpenCV REQUIRED)
+find_package(aruco REQUIRED)
+
 find_package(catkin REQUIRED COMPONENTS
   ardrone_autonomy
   cv_bridge
@@ -15,8 +19,14 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   std_srvs
   message_generation
+  image_transport
   roscpp
   rospy
+  tf
+
+  visualization_msgs
+  aruco
+  camera_calibration_parsers
 )
 
 # Compile third party libs
@@ -42,10 +52,17 @@ generate_dynamic_reconfigure_options(
 ################################################
 
 ## Generate messages in the 'msg' folder
-add_message_files(FILES filter_state.msg)
+add_message_files(
+        DIRECTORY msg
+        FILES
+        filter_state.msg
+        ArucoMarker.msg
+)
 
 ## Generate added messages 
-generate_messages(DEPENDENCIES std_msgs)
+generate_messages(DEPENDENCIES
+        std_msgs
+        geometry_msgs)
 
 ###################################
 ## catkin specific configuration ##
@@ -166,12 +183,14 @@ set(GUI_SOURCE_FILES
 	src/UINode/tum_ardrone_gui.cpp  
 	src/UINode/RosThread.cpp  
 	src/UINode/PingThread.cpp  
+        src/UINode/aruco_mapping.cpp
 )
 
 set(GUI_HEADER_FILES        
 	src/UINode/tum_ardrone_gui.h 
 	src/UINode/RosThread.h  
 	src/UINode/PingThread.h  
+        src/UINode/aruco_mapping.h
 )
 
 # *.ui

@@ -185,6 +185,8 @@ void RosThread::run()
     land_sub	   = nh_.subscribe(nh_.resolveName("ardrone/land"),1, &RosThread::landCb, this);
     toggleState_sub	   = nh_.subscribe(nh_.resolveName("ardrone/reset"),1, &RosThread::toggleStateCb, this);
 
+
+    //create the service client
     toggleCam_srv        = nh_.serviceClient<std_srvs::Empty>(nh_.resolveName("ardrone/togglecam"),1);
     flattrim_srv         = nh_.serviceClient<std_srvs::Empty>(nh_.resolveName("ardrone/flattrim"),1);
 
