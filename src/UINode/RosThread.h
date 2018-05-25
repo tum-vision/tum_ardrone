@@ -22,7 +22,7 @@
 #define __ROSTHREAD_H
  
  
-
+#ifndef Q_MOC_RUN
 #include "cvd/thread.h"
 #include "tum_ardrone/filter_state.h"
 #include "std_msgs/String.h"
@@ -32,6 +32,7 @@
 #include "sensor_msgs/Joy.h"
 #include "std_srvs/Empty.h"
 #include "std_msgs/Empty.h"
+#endif
 
 class tum_ardrone_gui;
 
